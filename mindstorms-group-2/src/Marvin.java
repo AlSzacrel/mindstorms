@@ -1,4 +1,3 @@
-import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -41,7 +40,7 @@ public class Marvin {
     }
 
     private void cancelRun() {
-        if (Button.ESCAPE.isDown()) {
+        if (configuration.cancel()) {
             running = false;
         }
     }

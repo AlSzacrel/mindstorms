@@ -1,3 +1,4 @@
+import lejos.nxt.Button;
 import lejos.nxt.LightSensor;
 import lejos.nxt.SensorPort;
 
@@ -12,6 +13,10 @@ public class Configuration {
 
     public LightSensor getLight() {
         return light;
+    }
+
+    public boolean cancel() {
+        return Button.ESCAPE.isDown();
     }
 
 }
