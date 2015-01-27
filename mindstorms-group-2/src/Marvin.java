@@ -1,3 +1,4 @@
+
 public class Marvin {
 
     private boolean running = true;
@@ -8,7 +9,6 @@ public class Marvin {
     }
 
     public void drive() {
-
         while (running) {
             cancelRun();
             configuration.displayInformation();

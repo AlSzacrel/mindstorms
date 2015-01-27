@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
@@ -6,10 +8,12 @@ import lejos.nxt.SensorPort;
 public class Configuration {
 
     private LightSensor light;
+    private final LinkedList<Step> steps;
 
     public Configuration() {
         super();
         light = new LightSensor(SensorPort.S4);
+        steps = new LinkedList<Step>();
     }
 
     public LightSensor getLight() {
@@ -32,12 +36,14 @@ public class Configuration {
     }
 
     public void runCurrentStep() {
-        // TODO Auto-generated method stub
+        if (steps.isEmpty()) {
+            return;
+        }
+        steps.get(0).run(this);
     }
 
     public void add(Step step) {
-        // TODO Auto-generated method stub
-
+        steps.add(step);
     }
 
 }
