@@ -1,4 +1,3 @@
-
 public class Marvin {
 
     private boolean running = true;
@@ -12,7 +11,6 @@ public class Marvin {
         while (running) {
             cancelRun();
             configuration.displayInformation();
-            configuration.runCurrentStep();
         }
     }
 

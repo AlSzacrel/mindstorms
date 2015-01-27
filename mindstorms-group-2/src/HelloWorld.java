@@ -1,4 +1,3 @@
-
 public class HelloWorld {
 
     public static void main(String[] args) {
@@ -8,7 +7,6 @@ public class HelloWorld {
 
     private static Configuration configuration() {
         Configuration configuration = new Configuration();
-        configuration.add(new FollowLine());
         return configuration;
     }
 
