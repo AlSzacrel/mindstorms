@@ -13,7 +13,9 @@ public class Configuration {
     public Configuration() {
         super();
         light = new LightSensor(SensorPort.S4);
-        steps = new LinkedList<Step>();
+	leftWheel = Motor.A;
+	rightWheel = Motor.B;
+	sensorMotor = Motor.C;
     }
 
     public LightSensor getLight() {
