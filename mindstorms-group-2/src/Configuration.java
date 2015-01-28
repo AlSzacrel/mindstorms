@@ -18,7 +18,7 @@ public class Configuration {
 
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
-    private static final boolean DEBUG_MODE = false;
+    private static final boolean DEBUG_MODE = true;
 
     private final LightSensor light;
     private final NXTRegulatedMotor leftWheel;
