@@ -1,18 +1,22 @@
+import java.util.ArrayList;
+
 import lejos.nxt.Motor;
 
 public class FollowLine implements Step {
+	
+	private DataSet sensData;
 
 	@Override
 	public void run(Configuration configuration) {
 		
-		configuration.
+		sensData = configuration.getLastSensorData();
 		
 	}
 	
-	public enum StraightCase(){
-		if() {
+	public void StraightCase(){
+		//if() {
 			
-		}
+		//}
 	}
 	
 	
