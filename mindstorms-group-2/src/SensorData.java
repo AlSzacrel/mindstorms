@@ -4,7 +4,7 @@ public class SensorData {
 
     private static final int MAX_ANGLE_STEPS = 5;
     private static final int STEP_SIZE = 175 / 5;
-    private Configuration configuration;
+    private final Configuration configuration;
 
     public SensorData(Configuration configuration) {
         this.configuration = configuration;
@@ -17,7 +17,8 @@ public class SensorData {
             int currentAngle = STEP_SIZE * step;
             sensorMotor.rotateTo(currentAngle);
             int lightValue = configuration.getLight().getNormalizedLightValue();
-            dataset.add(new Value(step, lightValue));
+            int distance = configuration.getUltraSonic().getDistance();
+            dataset.add(new Value(step, lightValue, distance));
         }
         configuration.updateSensorData(dataset);
     }

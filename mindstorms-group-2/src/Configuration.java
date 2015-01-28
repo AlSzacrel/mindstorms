@@ -16,13 +16,14 @@ import lejos.nxt.UltrasonicSensor;
 
 public class Configuration {
 
+    private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
     private final LightSensor light;
     private final NXTRegulatedMotor leftWheel;
     private final NXTRegulatedMotor rightWheel;
     private final NXTRegulatedMotor sensorMotor;
     private final ArrayList<DataSet> sensorData;
-    private final DataOutputStream someFile;
+    private final DataOutputStream sensorDataFile;
     private final UltrasonicSensor ultraSonic;
 
     public Configuration() throws IOException {
@@ -34,12 +35,12 @@ public class Configuration {
         sensorMotor = Motor.C;
         sensorMotor.setSpeed(0.05f * sensorMotor.getMaxSpeed());
         sensorData = new ArrayList<>();
-        File file = new File("sensorData.txt");
+        File file = new File(SENSOR_DATA_FILE_NAME);
         if (file.exists()) {
             file.delete();
         }
         file.createNewFile();
-        someFile = new DataOutputStream(new FileOutputStream(file));
+        sensorDataFile = new DataOutputStream(new FileOutputStream(file));
     }
 
     public LightSensor getLight() {
@@ -74,7 +75,7 @@ public class Configuration {
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
         try {
-            someFile.writeUTF(dataset.toString());
+            sensorDataFile.writeUTF(dataset.toString());
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -89,9 +90,9 @@ public class Configuration {
     }
 
     public void save() throws IOException {
-        someFile.writeUTF("\r\n");
-        someFile.flush();
-        someFile.close();
+        sensorDataFile.writeUTF("\r\n");
+        sensorDataFile.flush();
+        sensorDataFile.close();
     }
 
     public ArrayList<DataSet> getSensorData() {
