@@ -5,7 +5,7 @@ public class SensorDataCollector {
     private static final int MAX_ANGLE_STEPS = 5;
     private static final int STEP_SIZE = 175 / 5;
     private final Configuration configuration;
-    private bool leftToRight = true;
+    private boolean leftToRight = true;
 
     public SensorDataCollector(Configuration configuration) {
         this.configuration = configuration;
@@ -30,7 +30,7 @@ public class SensorDataCollector {
 		    int lightValue = configuration.getLight().getNormalizedLightValue();
 		    int distance = configuration.getUltraSonic().getDistance();
 		    leftToRight = !leftToRight;
-		    dataset.insert(step, new Value(step, lightValue, distance));
+		    dataset.add(step, new Value(step, lightValue, distance));
 		}
 	}
 	configuration.updateSensorData(dataset);

@@ -13,6 +13,10 @@ public class DataSet {
         values.add(value);
     }
 
+    public void add(int i, Value value) {
+        values.add(i, value);
+    }
+
     public int size() {
         return values.size();
     }
