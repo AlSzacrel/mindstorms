@@ -1,3 +1,4 @@
+package marvin;
 public class MovementPrimitives {
     private static final float CORRECTION_FACTOR = 0.75f;
     private float speed = 0;

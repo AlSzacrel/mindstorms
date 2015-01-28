@@ -1,3 +1,4 @@
+package marvin;
 
 public class DistanceFunctions implements Step {	
 

@@ -1,3 +1,4 @@
+package marvin;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class SensorDataCollector {
