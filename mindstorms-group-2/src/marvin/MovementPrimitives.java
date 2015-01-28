@@ -1,6 +1,10 @@
 package marvin;
+
 public class MovementPrimitives {
     private static final float CORRECTION_FACTOR = 0.75f;
+    private static final float SPEED_FACTOR_FULL = 1f;
+    private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
+    private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
     private float speed = 0;
     public final Configuration conf;
 
@@ -9,15 +13,15 @@ public class MovementPrimitives {
     }
 
     public void fullSpeed() {
-        speed = 0.5f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_FULL * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
     public void slow() {
-        speed = 0.25f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_SLOW * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
     public void crawl() {
-        speed = 0.125f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_CRAWL * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
     public void drive() {
