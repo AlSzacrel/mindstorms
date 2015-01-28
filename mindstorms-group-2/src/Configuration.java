@@ -12,6 +12,7 @@ import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.UltrasonicSensor;
 
 public class Configuration {
 
@@ -22,10 +23,12 @@ public class Configuration {
     private final NXTRegulatedMotor sensorMotor;
     private final ArrayList<DataSet> sensorData;
     private final DataOutputStream someFile;
+    private final UltrasonicSensor ultraSonic;
 
     public Configuration() throws IOException {
         super();
         light = new LightSensor(SensorPort.S4);
+        ultraSonic = new UltrasonicSensor(SensorPort.S2);
         leftWheel = Motor.A;
         rightWheel = Motor.B;
         sensorMotor = Motor.C;
@@ -41,6 +44,10 @@ public class Configuration {
 
     public LightSensor getLight() {
         return light;
+    }
+
+    public UltrasonicSensor getUltraSonic() {
+        return ultraSonic;
     }
 
     public NXTRegulatedMotor getSensorMotor() {
