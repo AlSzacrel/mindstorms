@@ -14,7 +14,21 @@ public class FollowLine implements Step {
 	}
 	
 	public void StraightCase(){
-		//if() {
+		//case line to the left or 
+		if(sensData.get(0).getValue() > 350){
+			for (int i = 1; i < sensData.size(); i++){
+				if(sensData.get(i).getValue() <= 350){
+					//TODO: case = line left
+					break;
+				} else {
+					//TODO: standing orthogonal to line
+				}
+			}
+		} else {
+			
+		}
+		
+		//for (int i = 0; i < sensData.size(); i++){
 			
 		//}
 	}
