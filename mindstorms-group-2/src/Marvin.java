@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 public class Marvin {
 
     private boolean running = true;
@@ -7,14 +9,13 @@ public class Marvin {
         this.configuration = configuration;
     }
 
-    public void drive() {
-        // TODO Move sensor head to left (use saved position to restore left
-        // position)
-        // TODO Reset tacho count so that tacho count on left position is 0
+    public void drive() throws IOException {
+        configuration.restoreLastSensorPosition();
         while (running) {
             cancelRun();
             configuration.displayInformation();
         }
+        configuration.saveLastSensorPosition();
     }
 
     private void cancelRun() {
