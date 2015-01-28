@@ -1,5 +1,7 @@
 import java.io.IOException;
 
+import lejos.util.Delay;
+
 public class Marvin {
 
     private boolean running = true;
@@ -18,12 +20,7 @@ public class Marvin {
             configuration.getMovementPrimitives().slow();
             configuration.getMovementPrimitives().drive();
             configuration.followLine();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            Delay.msDelay(500);
             configuration.getMovementPrimitives().stop();
         }
         configuration.saveLastSensorPosition();
