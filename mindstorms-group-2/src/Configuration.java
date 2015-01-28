@@ -84,4 +84,13 @@ public class Configuration {
         someFile.close();
     }
 
+	public ArrayList<DataSet> getSensorData() {
+		return sensorData;
+	}
+
+	public DataSet getLastSensorData() {
+		return sensorData.get(sensorData.size()-1);
+	}
+    
+
 }

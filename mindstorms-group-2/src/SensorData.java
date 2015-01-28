@@ -17,7 +17,7 @@ public class SensorData {
             int currentAngle = STEP_SIZE * step;
             sensorMotor.rotateTo(currentAngle);
             int lightValue = configuration.getLight().getNormalizedLightValue();
-            dataset.add(new Value(currentAngle, lightValue));
+            dataset.add(new Value(step, lightValue));
         }
         configuration.updateSensorData(dataset);
     }

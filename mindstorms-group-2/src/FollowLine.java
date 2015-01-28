@@ -1,8 +1,28 @@
+import java.util.ArrayList;
+
 import lejos.nxt.Motor;
 
 public class FollowLine implements Step {
+	
+	private DataSet sensData;
 
-    private enum Direction {
+	@Override
+	public void run(Configuration configuration) {
+		
+		sensData = configuration.getLastSensorData();
+		
+	}
+	
+	public void StraightCase(){
+		//if() {
+			
+		//}
+	}
+	
+	
+	// alter Code der mit schiebesensor nicht funktioniert: nur für Referenz
+
+   /** private enum Direction {
         LEFT() {
             @Override
             public void switchDirection() {
@@ -34,5 +54,5 @@ public class FollowLine implements Step {
         }
         currentDirection.switchDirection();
         last = currentDirection;
-    }
+    } */
 }
