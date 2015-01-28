@@ -17,4 +17,9 @@ public class Value {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return "Value [position=" + position + ", value=" + value + "]";
+    }
+
 }
