@@ -1,22 +1,111 @@
 import java.util.ArrayList;
 
 import lejos.nxt.Motor;
+//import MovementPrimitives;
 
 public class FollowLine implements Step {
 	
 	private DataSet sensData;
+	private MovementPrimitives movPrim;
+	
+	public FollowLine(MovementPrimitives movPrim) {
+		this.movPrim = movPrim;
+	}
 
 	@Override
 	public void run(Configuration configuration) {
 		
 		sensData = configuration.getLastSensorData();
+		evaluateStraightCase().adjustCourse(movPrim);
+		
 		
 	}
 	
-	public void StraightCase(){
-		//if() {
+	private enum StraightCase{
+		LOST() {
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim){
+
+				movPrim.slow();
+				movPrim.backup();
+			}
+		},
+		
+		STRAIGHT() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim){
+				movPrim.fullSpeed();
+			}
 			
-		//}
+		},
+		
+		ORTHOGONAL() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim){
+				movPrim.correctionLeft(); //TODO handle better
+			}
+		},
+		
+		LEFT() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim){
+				movPrim.correctionLeft();
+			}
+			
+		},
+		
+		RIGHT() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim){
+				movPrim.correctionRight();
+			}
+			
+		};
+		public abstract void adjustCourse(MovementPrimitives movPrim);
+		
+	}
+	
+	private StraightCase evaluateStraightCase(){
+		boolean line = false;
+		StraightCase currentCase = null;
+		
+		//case line to the left or 
+		if(sensData.get(0).getValue() > 350){
+			
+			for (int i = 1; i < sensData.size(); i++){
+				
+				if(sensData.get(i).getValue() <= 350){
+					currentCase = StraightCase.LEFT;
+					break;
+					
+				} else {
+					currentCase = StraightCase.ORTHOGONAL;
+				}
+			}
+		} else {
+			
+			for (int i = 1; i < sensData.size(); i++){		
+				
+				if(sensData.get(i).getValue() > 350){
+					line = true;
+					
+				} else if (line == true) { // Line in center
+					currentCase = StraightCase.STRAIGHT;
+					break;
+				}
+			}
+			if (line == true){
+				currentCase = StraightCase.RIGHT;
+				
+			} else {
+				currentCase = StraightCase.LOST;
+			}
+		}
+		return currentCase;
 	}
 	
 	
