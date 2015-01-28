@@ -2,19 +2,20 @@ import java.util.ArrayList;
 
 public class DataSet {
 
-    private ArrayList<Value> values;
+    private static final int FIRST_ELEMENT = 0;
+    private final ArrayList<Value> values;
 
     public DataSet(int numberOfElements) {
         super();
         this.values = new ArrayList<>(numberOfElements);
     }
 
-    public void add(Value value) {
+    public void append(Value value) {
         values.add(value);
     }
 
-    public void add(int i, Value value) {
-        values.add(i, value);
+    public void prepend(Value value) {
+        values.add(FIRST_ELEMENT, value);
     }
 
     public int size() {
@@ -25,9 +26,9 @@ public class DataSet {
     public String toString() {
         return "DataSet [values=" + values + "]";
     }
-    
-    public Value get(int index){
-    	return values.get(index);
+
+    public Value get(int index) {
+        return values.get(index);
     }
 
 }
