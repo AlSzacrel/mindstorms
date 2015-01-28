@@ -11,7 +11,11 @@ public class Value {
         this.distance = distance;
     }
 
-    public Integer getPosition() {
+    public Integer getDistance() {
+		return distance;
+	}
+
+	public Integer getPosition() {
         return position;
     }
 
