@@ -60,4 +60,9 @@ public class Configuration {
         return rightWheel;
     }
 
+	public ArrayList<DataSet> getSensorData() {
+		return sensorData;
+	}
+    
+
 }

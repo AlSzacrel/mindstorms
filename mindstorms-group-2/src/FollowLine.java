@@ -2,7 +2,23 @@ import lejos.nxt.Motor;
 
 public class FollowLine implements Step {
 
-    private enum Direction {
+	@Override
+	public void run(Configuration configuration) {
+		
+		configuration.
+		
+	}
+	
+	public enum StraightCase(){
+		if() {
+			
+		}
+	}
+	
+	
+	// alter Code der mit schiebesensor nicht funktioniert: nur für Referenz
+
+   /** private enum Direction {
         LEFT() {
             @Override
             public void switchDirection() {
@@ -34,5 +50,5 @@ public class FollowLine implements Step {
         }
         currentDirection.switchDirection();
         last = currentDirection;
-    }
+    } */
 }
