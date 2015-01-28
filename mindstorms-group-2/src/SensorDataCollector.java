@@ -1,12 +1,12 @@
 import lejos.nxt.NXTRegulatedMotor;
 
-public class SensorData {
+public class SensorDataCollector {
 
     private static final int MAX_ANGLE_STEPS = 5;
     private static final int STEP_SIZE = 175 / 5;
     private final Configuration configuration;
 
-    public SensorData(Configuration configuration) {
+    public SensorDataCollector(Configuration configuration) {
         this.configuration = configuration;
     }
 

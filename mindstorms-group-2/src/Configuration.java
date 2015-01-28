@@ -18,6 +18,8 @@ public class Configuration {
 
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
+    private static final boolean DEBUG_MODE = false;
+
     private final LightSensor light;
     private final NXTRegulatedMotor leftWheel;
     private final NXTRegulatedMotor rightWheel;
@@ -25,16 +27,22 @@ public class Configuration {
     private final ArrayList<DataSet> sensorData;
     private final DataOutputStream sensorDataFile;
     private final UltrasonicSensor ultraSonic;
+    private final MovementPrimitives movementPrimitives;
+    private final SensorDataCollector sensorDataCollector;
+    private final FollowLine followLine;
 
     public Configuration() throws IOException {
         super();
         light = new LightSensor(SensorPort.S4);
         ultraSonic = new UltrasonicSensor(SensorPort.S2);
-        leftWheel = Motor.A;
-        rightWheel = Motor.B;
+        leftWheel = Motor.B;
+        rightWheel = Motor.A;
         sensorMotor = Motor.C;
         sensorMotor.setSpeed(0.05f * sensorMotor.getMaxSpeed());
         sensorData = new ArrayList<>();
+        movementPrimitives = new MovementPrimitives(this);
+        followLine = new FollowLine(movementPrimitives);
+        sensorDataCollector = new SensorDataCollector(this);
         File file = new File(SENSOR_DATA_FILE_NAME);
         if (file.exists()) {
             file.delete();
@@ -53,6 +61,18 @@ public class Configuration {
 
     public NXTRegulatedMotor getSensorMotor() {
         return sensorMotor;
+    }
+
+    public SensorDataCollector getSensorDataCollector() {
+        return sensorDataCollector;
+    }
+
+    public MovementPrimitives getMovementPrimitives() {
+        return movementPrimitives;
+    }
+
+    public void followLine() {
+        followLine.run(this);
     }
 
     public boolean cancel() {
@@ -74,10 +94,12 @@ public class Configuration {
 
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
-        try {
-            sensorDataFile.writeUTF(dataset.toString());
-        } catch (IOException exception) {
-            exception.printStackTrace();
+        if (DEBUG_MODE) {
+            try {
+                sensorDataFile.writeUTF(dataset.toString());
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
         }
     }
 

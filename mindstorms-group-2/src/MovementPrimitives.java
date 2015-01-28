@@ -8,25 +8,29 @@ public class MovementPrimitives {
     }
 
     public void fullSpeed() {
-        speed = Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
-    }
-
-    public void slow() {
         speed = 0.5f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
-    public void crawl() {
+    public void slow() {
         speed = 0.25f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+    }
+
+    public void crawl() {
+        speed = 0.125f * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
     public void drive() {
         conf.getLeftWheel().setSpeed(speed);
         conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().forward();
     }
 
     public void backup() {
-        conf.getLeftWheel().setSpeed(-speed);
-        conf.getRightWheel().setSpeed(-speed);
+        conf.getLeftWheel().setSpeed(speed);
+        conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().backward();
+        conf.getRightWheel().backward();
     }
 
     public void stop() {
@@ -37,30 +41,40 @@ public class MovementPrimitives {
     public void correctionLeft() {
         conf.getLeftWheel().setSpeed(CORRECTION_FACTOR * speed);
         conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().forward();
     }
 
     public void correctionRight() {
         conf.getLeftWheel().setSpeed(speed);
         conf.getRightWheel().setSpeed(CORRECTION_FACTOR * speed);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().forward();
     }
 
     public void turnLeft() {
-        conf.getLeftWheel().setSpeed(0);
         conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().stop();
+        conf.getRightWheel().forward();
     }
 
     public void turnRight() {
         conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(0);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().stop();
     }
 
     public void spinLeft() {
-        conf.getLeftWheel().setSpeed(-speed);
+        conf.getLeftWheel().setSpeed(speed);
         conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().backward();
+        conf.getRightWheel().forward();
     }
 
     public void spinRight() {
         conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(-speed);
+        conf.getRightWheel().setSpeed(speed);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().backward();
     }
 }

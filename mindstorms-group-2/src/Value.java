@@ -15,7 +15,7 @@ public class Value {
         return position;
     }
 
-    public Integer getValue() {
+    public Integer getLightValue() {
         return value;
     }
 
