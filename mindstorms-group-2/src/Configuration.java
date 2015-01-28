@@ -1,5 +1,7 @@
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import lejos.nxt.SensorPort;
 
 public class Configuration {
 
+    private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
     private final LightSensor light;
     private final NXTRegulatedMotor leftWheel;
     private final NXTRegulatedMotor rightWheel;
@@ -84,13 +87,36 @@ public class Configuration {
         someFile.close();
     }
 
-	public ArrayList<DataSet> getSensorData() {
-		return sensorData;
-	}
+    public ArrayList<DataSet> getSensorData() {
+        return sensorData;
+    }
 
-	public DataSet getLastSensorData() {
-		return sensorData.get(sensorData.size()-1);
-	}
-    
+    public DataSet getLastSensorData() {
+        return sensorData.get(sensorData.size() - 1);
+    }
+
+    public void saveLastSensorPosition() throws IOException {
+        File file = new File(LAST_POSITION_FILE_NAME);
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+        DataOutputStream lastPosition = new DataOutputStream(new FileOutputStream(file));
+        lastPosition.writeInt(sensorMotor.getPosition());
+        lastPosition.flush();
+        lastPosition.close();
+    }
+
+    public void restoreLastSensorPosition() throws IOException {
+        File file = new File(LAST_POSITION_FILE_NAME);
+        if (!file.exists()) {
+            return;
+        }
+        try (DataInputStream lastInput = new DataInputStream(new FileInputStream(file))) {
+            int lastPosition = lastInput.readInt();
+            sensorMotor.rotateTo(-lastPosition);
+            sensorMotor.resetTachoCount();
+        }
+    }
 
 }
