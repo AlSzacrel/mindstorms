@@ -21,5 +21,9 @@ public class DataSet {
     public String toString() {
         return "DataSet [values=" + values + "]";
     }
+    
+    public Value get(int index){
+    	return values.get(index);
+    }
 
 }
