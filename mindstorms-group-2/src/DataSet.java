@@ -13,4 +13,13 @@ public class DataSet {
         values.add(value);
     }
 
+    public int size() {
+        return values.size();
+    }
+
+    @Override
+    public String toString() {
+        return "DataSet [values=" + values + "]";
+    }
+
 }
