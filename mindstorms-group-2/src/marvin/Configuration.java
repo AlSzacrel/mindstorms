@@ -1,4 +1,5 @@
 package marvin;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import lejos.nxt.Button;
+import lejos.nxt.ButtonListener;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
@@ -16,6 +18,17 @@ import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 
 public class Configuration {
+
+    private final class CancelListener implements ButtonListener {
+        @Override
+        public void buttonReleased(Button b) {
+            cancel = true;
+        }
+
+        @Override
+        public void buttonPressed(Button b) {
+        }
+    }
 
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
@@ -31,6 +44,7 @@ public class Configuration {
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
     private final FollowLine followLine;
+    private boolean cancel = false;
 
     public Configuration() throws IOException {
         super();
@@ -39,11 +53,12 @@ public class Configuration {
         leftWheel = Motor.B;
         rightWheel = Motor.A;
         sensorMotor = Motor.C;
-        sensorMotor.setSpeed(0.05f * sensorMotor.getMaxSpeed());
+        sensorMotor.setSpeed(sensorMotor.getMaxSpeed());
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
         followLine = new FollowLine(movementPrimitives);
         sensorDataCollector = new SensorDataCollector(this);
+        Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
         if (file.exists()) {
             file.delete();
@@ -77,7 +92,7 @@ public class Configuration {
     }
 
     public boolean cancel() {
-        return Button.ESCAPE.isDown();
+        return cancel;
     }
 
     public void displayInformation() {
