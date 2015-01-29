@@ -31,7 +31,7 @@ public class Configuration {
 
     public static final int MAX_ANGLE = 150;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
     private static final int MAX_LINE_SIZE = 20;
 
     private final LightSensor light;
@@ -135,6 +135,7 @@ public class Configuration {
             sensorDataFile.flush();
         }
         sensorDataFile.close();
+        sensorMotor.rotateTo(0);
     }
 
     public void write(String data) {
