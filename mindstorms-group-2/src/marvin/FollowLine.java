@@ -1,7 +1,5 @@
 package marvin;
 
-//import MovementPrimitives;
-
 public class FollowLine implements Step {
 
     private final MovementPrimitives movPrim;
@@ -44,7 +42,8 @@ public class FollowLine implements Step {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.turnLeft();
+                movPrim.correctionLeft();
+                // movPrim.turnLeft();
             }
         },
 
@@ -52,7 +51,8 @@ public class FollowLine implements Step {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.turnRight();
+                movPrim.correctionRight();
+                // movPrim.turnRight();
             }
         },
         CORRECTION_LEFT() {
@@ -74,7 +74,8 @@ public class FollowLine implements Step {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.spinLeft();
+                movPrim.correctionLeft();
+                // movPrim.spinLeft();
             }
         },
 
@@ -82,7 +83,8 @@ public class FollowLine implements Step {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.spinRight();
+                movPrim.correctionRight();
+                // movPrim.spinRight();
             }
         };
 
@@ -107,7 +109,7 @@ public class FollowLine implements Step {
         } else if (lineWidth > 90) { // TODO: How wide is the line?
             // Line is too wide, might be orthogonal line or corner.
             // TODO what is with long lines which have both ends?
-            if (leftBorder >= 115) {
+            if (leftBorder >= 120) {
                 // Line is to the right of center
                 currentCase = StraightCase.SPIN_RIGHT;
             } else {
