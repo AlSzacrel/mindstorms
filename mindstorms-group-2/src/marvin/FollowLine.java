@@ -66,7 +66,13 @@ public class FollowLine implements Step {
 				config.getLines().size() - 1);
 		int lineWidth = lineBorders.getBrightToDark()
 				- lineBorders.getDarkToBright();
-		if (lineWidth > 50) { // TODO: How wide is the line?
+		if (lineBorders.getBrightToDark() == Integer.MIN_VALUE && lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
+			currentCase = StraightCase.LOST;
+		} else if (lineBorders.getBrightToDark() == Integer.MIN_VALUE) {
+			currentCase = StraightCase.RIGHT;
+		} else if (lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
+			currentCase = StraightCase.LEFT;
+		} else if (lineWidth > 100) { // TODO: How wide is the line?
 			// Line is too wide, might be orthogonal line or corner.
 			currentCase = StraightCase.ORTHOGONAL;
 		} else if (lineWidth > 0) {
