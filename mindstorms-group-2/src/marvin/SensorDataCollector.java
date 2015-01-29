@@ -35,6 +35,7 @@ public class SensorDataCollector {
 
             if (isDark(lastLightValue) && isBright(lightValue)) {
                 darkToBrightAngle = (angle + lastAngle) / 2;
+                brightToDarkAngle = Integer.MIN_VALUE;
             }
             if (isBright(lastLightValue) && isDark(lightValue)) {
                 brightToDarkAngle = (angle + lastAngle) / 2;
