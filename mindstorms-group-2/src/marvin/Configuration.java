@@ -32,6 +32,7 @@ public class Configuration {
     public static final int MAX_ANGLE = 150;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final boolean DEBUG_MODE = true;
+    private static final int MAX_LINE_SIZE = 20;
 
     private final LightSensor light;
     private final NXTRegulatedMotor leftWheel;
@@ -129,17 +130,21 @@ public class Configuration {
     }
 
     public void save() throws IOException {
-        sensorDataFile.writeUTF("\r\n");
-        sensorDataFile.flush();
+        if (DEBUG_MODE) {
+            sensorDataFile.writeUTF("\r\n");
+            sensorDataFile.flush();
+        }
         sensorDataFile.close();
     }
 
     public void write(String data) {
-        try {
-            sensorDataFile.writeUTF(data);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            throw new RuntimeException(e);
+        if (DEBUG_MODE) {
+            try {
+                sensorDataFile.writeUTF(data);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -155,6 +160,9 @@ public class Configuration {
     }
 
     public void addNewLine(LineBorders line) {
+        if (lines.size() > MAX_LINE_SIZE) {
+            lines.remove(0);
+        }
         lines.add(line);
     }
 
