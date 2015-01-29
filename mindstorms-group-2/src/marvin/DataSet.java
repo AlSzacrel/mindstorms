@@ -1,4 +1,5 @@
 package marvin;
+
 import java.util.ArrayList;
 
 public class DataSet {
@@ -29,6 +30,9 @@ public class DataSet {
     }
 
     public Value get(int index) {
+        if (values.isEmpty()) {
+            return new Value(0, 0, 0);
+        }
         return values.get(index);
     }
 

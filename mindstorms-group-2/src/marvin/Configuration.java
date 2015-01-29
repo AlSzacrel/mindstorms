@@ -138,6 +138,9 @@ public class Configuration {
     }
 
     public DataSet getLastSensorData() {
+        if (sensorData.isEmpty()) {
+            return new DataSet(1);
+        }
         return sensorData.get(sensorData.size() - 1);
     }
 
