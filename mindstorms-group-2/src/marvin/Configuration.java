@@ -1,12 +1,11 @@
 package marvin;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import lejos.nxt.Button;
 import lejos.nxt.ButtonListener;
@@ -30,8 +29,8 @@ public class Configuration {
         }
     }
 
+    public static final int MAX_ANGLE = 150;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
-    private static final String LAST_POSITION_FILE_NAME = "lastPosition.txt";
     private static final boolean DEBUG_MODE = true;
 
     private final LightSensor light;
@@ -45,6 +44,7 @@ public class Configuration {
     private final SensorDataCollector sensorDataCollector;
     private final FollowLine followLine;
     private boolean cancel = false;
+    private final ArrayList<LineBorders> lines;
 
     public Configuration() throws IOException {
         super();
@@ -53,7 +53,8 @@ public class Configuration {
         leftWheel = Motor.B;
         rightWheel = Motor.A;
         sensorMotor = Motor.C;
-        sensorMotor.setSpeed(sensorMotor.getMaxSpeed());
+        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
+        lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
         followLine = new FollowLine(movementPrimitives);
@@ -91,7 +92,7 @@ public class Configuration {
         followLine.run(this);
     }
 
-    public boolean cancel() {
+    public boolean isCancel() {
         return cancel;
     }
 
@@ -110,13 +111,13 @@ public class Configuration {
 
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
-        if (DEBUG_MODE) {
-            try {
-                sensorDataFile.writeUTF(dataset.toString());
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }
+        // if (DEBUG_MODE) {
+        // try {
+        // sensorDataFile.writeUTF(dataset.toString());
+        // } catch (IOException exception) {
+        // exception.printStackTrace();
+        // }
+        // }
     }
 
     public NXTRegulatedMotor getLeftWheel() {
@@ -133,6 +134,10 @@ public class Configuration {
         sensorDataFile.close();
     }
 
+    public void write(String data) throws IOException {
+        sensorDataFile.writeUTF(data);
+    }
+
     public ArrayList<DataSet> getSensorData() {
         return sensorData;
     }
@@ -144,28 +149,12 @@ public class Configuration {
         return sensorData.get(sensorData.size() - 1);
     }
 
-    public void saveLastSensorPosition() throws IOException {
-        File file = new File(LAST_POSITION_FILE_NAME);
-        if (file.exists()) {
-            file.delete();
-        }
-        file.createNewFile();
-        DataOutputStream lastPosition = new DataOutputStream(new FileOutputStream(file));
-        lastPosition.writeInt(sensorMotor.getPosition());
-        lastPosition.flush();
-        lastPosition.close();
+    public void addNewLine(LineBorders line) {
+        lines.add(line);
     }
 
-    public void restoreLastSensorPosition() throws IOException {
-        File file = new File(LAST_POSITION_FILE_NAME);
-        if (!file.exists()) {
-            return;
-        }
-        try (DataInputStream lastInput = new DataInputStream(new FileInputStream(file))) {
-            int lastPosition = lastInput.readInt();
-            sensorMotor.rotateTo(-lastPosition);
-            sensorMotor.resetTachoCount();
-        }
+    public List<LineBorders> getLines() {
+        return lines;
     }
 
 }

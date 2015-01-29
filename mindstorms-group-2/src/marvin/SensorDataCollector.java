@@ -1,39 +1,60 @@
 package marvin;
+
+import java.io.IOException;
+
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.util.Delay;
 
 public class SensorDataCollector {
 
-    private static final int MAX_ANGLE_STEPS = 5;
-    private static final int STEP_SIZE = 175 / 5;
+    private static final int BRIGHT_THRESHOLD = 350;
+    // private static final int MAX_ANGLE_STEPS = 5;
+    // private static final int STEP_SIZE = 175 / 5;
     private final Configuration configuration;
-    private boolean leftToRight = true;
+
+    private final boolean leftToRight = true;
 
     public SensorDataCollector(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public void collectData() {
+    public void collectData() throws IOException {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
-        DataSet dataset = new DataSet(MAX_ANGLE_STEPS);
-        if (true == leftToRight) {
-            for (int step = 0; step < MAX_ANGLE_STEPS; step++) {
-                int currentAngle = STEP_SIZE * step;
-                sensorMotor.rotateTo(currentAngle);
-                int lightValue = configuration.getLight().getNormalizedLightValue();
-                int distance = configuration.getUltraSonic().getDistance();
-                leftToRight = !leftToRight;
-                dataset.append(new Value(step, lightValue, distance));
+        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
+        sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        Delay.msDelay(100);
+        int lastLightValue = configuration.getLight().getNormalizedLightValue();
+        int lastAngle = sensorMotor.getTachoCount();
+        int darkToBrightAngle = Integer.MIN_VALUE;
+        int brightToDarkAngle = Integer.MIN_VALUE;
+
+        while (sensorMotor.isMoving() && !configuration.isCancel()) {
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            Integer angle = sensorMotor.getTachoCount();
+            configuration.write(angle + " - " + lightValue + ";");
+
+            if (isDark(lastLightValue) && isBright(lightValue)) {
+                darkToBrightAngle = (angle + lastAngle) / 2;
             }
-        } else {
-            for (int step = 4; step >= 0; step--) {
-                int currentAngle = STEP_SIZE * step;
-                sensorMotor.rotateTo(currentAngle);
-                int lightValue = configuration.getLight().getNormalizedLightValue();
-                int distance = configuration.getUltraSonic().getDistance();
-                leftToRight = !leftToRight;
-                dataset.prepend(new Value(step, lightValue, distance));
+            if (isBright(lastLightValue) && isDark(lightValue)) {
+                brightToDarkAngle = (angle + lastAngle) / 2;
             }
+            lastLightValue = lightValue;
+            lastAngle = angle;
+            Delay.msDelay(100);
         }
-        configuration.updateSensorData(dataset);
+        configuration.write("brightToDark: " + brightToDarkAngle + " darkToBright: " + darkToBrightAngle + ";");
+        sensorMotor.rotateTo(0, true);
+        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
+        sensorMotor.waitComplete();
+        configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle));
+    }
+
+    private boolean isBright(int lightValue) {
+        return lightValue > BRIGHT_THRESHOLD;
+    }
+
+    private boolean isDark(int lightValue) {
+        return !isBright(lightValue);
     }
 }
