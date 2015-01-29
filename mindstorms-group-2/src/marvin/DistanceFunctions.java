@@ -28,6 +28,7 @@ public class DistanceFunctions implements Step {
 		leftDistance = sensData.get(0).getDistance();
 		rightDistance = sensData.get(sensData.size() - 1).getDistance();
 		centerDistance = sensData.get(sensData.size() / 2).getDistance();
+		followLeftWall();
 
 	}
 

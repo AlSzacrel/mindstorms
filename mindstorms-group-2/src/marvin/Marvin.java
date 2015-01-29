@@ -23,7 +23,8 @@ public class Marvin {
             configuration.getSensorDataCollector().collectData();
             configuration.getMovementPrimitives().slow();
             configuration.getMovementPrimitives().drive();
-            configuration.followLine();
+            //configuration.followLine();
+            configuration.followLeftWall();
             Delay.msDelay(500);
             configuration.getMovementPrimitives().stop();
         }

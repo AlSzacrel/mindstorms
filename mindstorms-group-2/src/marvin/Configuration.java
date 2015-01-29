@@ -44,6 +44,7 @@ public class Configuration {
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
     private final FollowLine followLine;
+    private final DistanceFunctions followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
 
@@ -59,6 +60,7 @@ public class Configuration {
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
         followLine = new FollowLine(movementPrimitives);
+        followLeftWall = new DistanceFunctions();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -91,6 +93,10 @@ public class Configuration {
 
     public void followLine() {
         followLine.run(this);
+    }
+
+    public void followLeftWall() {
+        followLeftWall.run(this);
     }
 
     public boolean isCancel() {
