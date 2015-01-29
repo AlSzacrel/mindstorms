@@ -15,6 +15,7 @@ public class ColorDistinction implements Step {
 	public void run(Configuration configuration) {
 		DataSet sensorData = configuration.getLastSensorData();
 		
+		//TODO request bluetooth value
 		float colorAVG = sensorData.get(sensorData.size() - 1).getLightValue();
 		
 		//TODO adjust once also scanning from right to left
