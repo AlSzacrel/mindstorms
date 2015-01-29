@@ -2,8 +2,6 @@ package marvin;
 
 import java.io.IOException;
 
-import lejos.util.Delay;
-
 public class Marvin {
 
     private boolean running = true;
@@ -21,11 +19,11 @@ public class Marvin {
             cancelRun();
             configuration.displayInformation();
             configuration.getSensorDataCollector().collectData();
-            configuration.getMovementPrimitives().slow();
-            configuration.getMovementPrimitives().drive();
+            // configuration.getMovementPrimitives().slow();
+            // configuration.getMovementPrimitives().drive();
             configuration.followLine();
-            Delay.msDelay(500);
-            configuration.getMovementPrimitives().stop();
+            // Delay.msDelay(500);
+            // configuration.getMovementPrimitives().stop();
         }
         configuration.save();
     }
