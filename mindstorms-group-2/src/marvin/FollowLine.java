@@ -71,19 +71,18 @@ public class FollowLine implements Step {
 			currentCase = StraightCase.ORTHOGONAL;
 		} else if (lineWidth > 0) {
 			// We're still on the line.
-			if (lineBorders.getBrightToDark() > 85
-					&& lineBorders.getDarkToBright() < 85) {
+			if (lineBorders.getBrightToDark() > 80
+					&& lineBorders.getDarkToBright() < 80) {
 				// Line is centrally in front of us.
 				currentCase = StraightCase.STRAIGHT;
-			} else if (lineBorders.getDarkToBright() >= 85) {
+			} else if (lineBorders.getDarkToBright() >= 80) {
 				// Line is to the right of center
 				currentCase = StraightCase.RIGHT;
-			} else if (lineBorders.getBrightToDark() <= 85) {
+			} else {
 				// Line is to the left of center
 				currentCase = StraightCase.LEFT;
 			}
-		} else if (lineBorders.getBrightToDark() == Integer.MIN_VALUE
-				&& lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
+		} else {
 			currentCase = StraightCase.LOST;
 		}
 		return currentCase;
