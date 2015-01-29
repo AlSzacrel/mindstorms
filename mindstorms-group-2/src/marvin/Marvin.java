@@ -2,7 +2,7 @@ package marvin;
 
 import java.io.IOException;
 
-import lejos.nxt.comm.RConsole;
+import lejos.util.Delay;
 
 public class Marvin {
 
@@ -14,21 +14,20 @@ public class Marvin {
     }
 
     public void drive() throws IOException {
-        RConsole.openUSB(0);
-        RConsole.println("restoreSensorPosition");
-        configuration.resetSensorPosition();
-        RConsole.println("collect data");
-        configuration.getSensorDataCollector().collectData();
-        RConsole.println(configuration.getLines().toString());
-        // while (running) {
-        // cancelRun();
-        // configuration.displayInformation();
-        // configuration.getMovementPrimitives().slow();
-        // configuration.getMovementPrimitives().drive();
-        // configuration.followLine();
-        // Delay.msDelay(500);
-        // configuration.getMovementPrimitives().stop();
-        // }
+        // RConsole.openUSB(0);
+        // RConsole.println("collect data");
+        // RConsole.println(configuration.getLines().toString());
+        while (running) {
+            cancelRun();
+            configuration.displayInformation();
+            configuration.getSensorDataCollector().collectData();
+            configuration.getMovementPrimitives().slow();
+            configuration.getMovementPrimitives().drive();
+            configuration.followLine();
+            Delay.msDelay(500);
+            configuration.getMovementPrimitives().stop();
+        }
+        configuration.save();
     }
 
     private void cancelRun() {
