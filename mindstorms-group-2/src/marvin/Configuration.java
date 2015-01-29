@@ -15,8 +15,6 @@ import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
-import lejos.nxt.comm.RConsole;
-import lejos.util.Delay;
 
 public class Configuration {
 
@@ -31,6 +29,7 @@ public class Configuration {
         }
     }
 
+    public static final int MAX_ANGLE = 150;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final boolean DEBUG_MODE = true;
 
@@ -112,13 +111,13 @@ public class Configuration {
 
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
-        if (DEBUG_MODE) {
-            try {
-                sensorDataFile.writeUTF(dataset.toString());
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }
+        // if (DEBUG_MODE) {
+        // try {
+        // sensorDataFile.writeUTF(dataset.toString());
+        // } catch (IOException exception) {
+        // exception.printStackTrace();
+        // }
+        // }
     }
 
     public NXTRegulatedMotor getLeftWheel() {
@@ -135,6 +134,10 @@ public class Configuration {
         sensorDataFile.close();
     }
 
+    public void write(String data) throws IOException {
+        sensorDataFile.writeUTF(data);
+    }
+
     public ArrayList<DataSet> getSensorData() {
         return sensorData;
     }
@@ -144,20 +147,6 @@ public class Configuration {
             return new DataSet(1);
         }
         return sensorData.get(sensorData.size() - 1);
-    }
-
-    public void resetSensorPosition() throws IOException {
-        sensorMotor.setStallThreshold(1, 25);
-        RConsole.println("restore until sensor is left");
-        sensorMotor.backward();
-        sensorMotor.waitComplete();
-        sensorMotor.stop();
-        RConsole.println("stopped");
-        sensorMotor.forward();
-        Delay.msDelay(100);
-        sensorMotor.stop();
-        RConsole.println("isStalled (reset):" + sensorMotor.isStalled());
-        RConsole.println("Sensor is complete left");
     }
 
     public void addNewLine(LineBorders line) {

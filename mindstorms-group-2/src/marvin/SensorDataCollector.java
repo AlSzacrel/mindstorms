@@ -1,7 +1,8 @@
 package marvin;
 
+import java.io.IOException;
+
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.comm.RConsole;
 import lejos.util.Delay;
 
 public class SensorDataCollector {
@@ -17,41 +18,36 @@ public class SensorDataCollector {
         this.configuration = configuration;
     }
 
-    public void collectData() {
+    public void collectData() throws IOException {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
-        RConsole.println("set threshold");
-        sensorMotor.setStallThreshold(1, 25);
-        RConsole.println("forward");
         sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
-        sensorMotor.forward();
-        sensorMotor.waitComplete();
-        RConsole.println("get values before while");
+        sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        Delay.msDelay(100);
         int lastLightValue = configuration.getLight().getNormalizedLightValue();
         int lastAngle = sensorMotor.getTachoCount();
         int darkToBrightAngle = Integer.MIN_VALUE;
         int brightToDarkAngle = Integer.MIN_VALUE;
-        RConsole.println("isStalled: " + sensorMotor.isStalled());
-        while (!sensorMotor.isStalled() && !configuration.isCancel()) {
-            RConsole.println("start loop");
+
+        while (sensorMotor.isMoving() && !configuration.isCancel()) {
             int lightValue = configuration.getLight().getNormalizedLightValue();
             Integer angle = sensorMotor.getTachoCount();
-            if (isDark(lastLightValue) && isBright(lastLightValue)) {
+            configuration.write(angle + " - " + lightValue + ";");
+
+            if (isDark(lastLightValue) && isBright(lightValue)) {
                 darkToBrightAngle = (angle + lastAngle) / 2;
             }
-            if (isBright(lastLightValue) && isDark(lastLightValue)) {
+            if (isBright(lastLightValue) && isDark(lightValue)) {
                 brightToDarkAngle = (angle + lastAngle) / 2;
             }
             lastLightValue = lightValue;
             lastAngle = angle;
-            Delay.msDelay(50);
-            RConsole.println("isStalled: " + sensorMotor.isStalled());
+            Delay.msDelay(100);
         }
-        RConsole.println("finished loop");
-        sensorMotor.backward();
-        sensorMotor.setSpeed(0.01f * sensorMotor.getMaxSpeed());
+        configuration.write("brightToDark: " + brightToDarkAngle + " darkToBright: " + darkToBrightAngle + ";");
+        sensorMotor.rotateTo(0, true);
+        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         sensorMotor.waitComplete();
         configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle));
-        RConsole.println("finished collectData");
     }
 
     private boolean isBright(int lightValue) {
