@@ -27,6 +27,8 @@ public class SensorDataCollector {
         int lastAngle = sensorMotor.getTachoCount();
         int darkToBrightAngle = Integer.MIN_VALUE;
         int brightToDarkAngle = Integer.MIN_VALUE;
+        int minAngle = lastAngle;
+        int maxAngle = lastAngle;
 
         while (sensorMotor.isMoving() && !configuration.isCancel()) {
             int lightValue = configuration.getLight().getNormalizedLightValue();
@@ -42,6 +44,8 @@ public class SensorDataCollector {
             }
             lastLightValue = lightValue;
             lastAngle = angle;
+            minAngle = Math.min(minAngle, angle);
+            maxAngle = Math.max(maxAngle, angle);
             Delay.msDelay(100);
         }
         configuration.write("darkToBright: " + darkToBrightAngle + " brightToDark: " + brightToDarkAngle
@@ -49,7 +53,7 @@ public class SensorDataCollector {
         sensorMotor.rotateTo(0, true);
         sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         sensorMotor.waitComplete();
-        configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle));
+        configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle, minAngle, maxAngle));
     }
 
     private boolean isBright(int lightValue) {
