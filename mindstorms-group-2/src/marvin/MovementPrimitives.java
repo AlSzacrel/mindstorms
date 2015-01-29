@@ -1,10 +1,10 @@
 package marvin;
 
 public class MovementPrimitives {
-    private static final float BACKUP_FACTOR = 0.5f;
     private static final float CORRECTION_FACTOR = 0.75f;
     private static final float TURN_FACTOR = 0.5f;
     private static final float SPEED_FACTOR_FULL = 0.5f;
+    private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
     private float speed = 0;
