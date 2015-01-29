@@ -40,7 +40,7 @@ public class FollowLine implements Step {
             }
         },
 
-        FARLEFT() {
+        TURN_LEFT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
@@ -48,14 +48,14 @@ public class FollowLine implements Step {
             }
         },
 
-        FARRIGHT() {
+        TURN_RIGHT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
                 movPrim.turnRight();
             }
         },
-        LEFT() {
+        CORRECTION_LEFT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
@@ -63,7 +63,7 @@ public class FollowLine implements Step {
             }
         },
 
-        RIGHT() {
+        CORRECTION_RIGHT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
@@ -78,27 +78,31 @@ public class FollowLine implements Step {
     private StraightCase evaluateStraightCase(Configuration config) {
         StraightCase currentCase = null;
         LineBorders lineBorders = config.getLines().get(config.getLines().size() - 1);
-        int lineWidth = lineBorders.getBrightToDark() - lineBorders.getDarkToBright();
-        if (lineBorders.getBrightToDark() == Integer.MIN_VALUE && lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
+        int rightBorder = lineBorders.getBrightToDark();
+		int leftBorder = lineBorders.getDarkToBright();
+		int lineWidth = rightBorder - leftBorder;
+        float lineCenter = (rightBorder + leftBorder)/2;
+        
+		if (rightBorder == Integer.MIN_VALUE && leftBorder == Integer.MIN_VALUE) {
             currentCase = StraightCase.LOST;
-        } else if (lineBorders.getBrightToDark() == Integer.MIN_VALUE) {
-            currentCase = StraightCase.FARRIGHT;
-        } else if (lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
-            currentCase = StraightCase.FARLEFT;
-        } else if (lineWidth > 100) { // TODO: How wide is the line?
+        } else if (rightBorder == Integer.MIN_VALUE) {
+            currentCase = StraightCase.TURN_RIGHT;
+        } else if (leftBorder == Integer.MIN_VALUE) {
+            currentCase = StraightCase.TURN_LEFT;
+        } else if (lineWidth > 90) { // TODO: How wide is the line?
             // Line is too wide, might be orthogonal line or corner.
             currentCase = StraightCase.ORTHOGONAL;
         } else if (lineWidth > 0) {
             // We're still on the line.
-            if (lineBorders.getBrightToDark() > 80 && lineBorders.getDarkToBright() < 80) {
+        	if (64 < lineCenter && lineCenter < 94) {
                 // Line is centrally in front of us.
                 currentCase = StraightCase.STRAIGHT;
-            } else if (lineBorders.getDarkToBright() >= 80) {
+            } else if (lineCenter >= 94) {
                 // Line is to the right of center
-                currentCase = StraightCase.RIGHT;
+                currentCase = StraightCase.CORRECTION_RIGHT;
             } else {
                 // Line is to the left of center
-                currentCase = StraightCase.LEFT;
+                currentCase = StraightCase.CORRECTION_LEFT;
             }
         } else {
             currentCase = StraightCase.LOST;
