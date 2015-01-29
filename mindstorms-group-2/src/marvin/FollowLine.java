@@ -40,6 +40,21 @@ public class FollowLine implements Step {
 			}
 		},
 
+		FARLEFT() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim) {
+				movPrim.turnLeft();
+			}
+		},
+
+		FARRIGHT() {
+
+			@Override
+			public void adjustCourse(MovementPrimitives movPrim) {
+				movPrim.turnRight();
+			}
+		},
 		LEFT() {
 
 			@Override
@@ -69,9 +84,9 @@ public class FollowLine implements Step {
 		if (lineBorders.getBrightToDark() == Integer.MIN_VALUE && lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
 			currentCase = StraightCase.LOST;
 		} else if (lineBorders.getBrightToDark() == Integer.MIN_VALUE) {
-			currentCase = StraightCase.RIGHT;
+			currentCase = StraightCase.FARRIGHT;
 		} else if (lineBorders.getDarkToBright() == Integer.MIN_VALUE) {
-			currentCase = StraightCase.LEFT;
+			currentCase = StraightCase.FARLEFT;
 		} else if (lineWidth > 100) { // TODO: How wide is the line?
 			// Line is too wide, might be orthogonal line or corner.
 			currentCase = StraightCase.ORTHOGONAL;
