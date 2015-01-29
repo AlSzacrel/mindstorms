@@ -83,17 +83,14 @@ public class DistanceFunctions implements Step {
 	public void followLeftWall() {
 		if (!isWallLeft()) {
 			movPrim.turnLeft();
-
-		} else if (leftDistance < FOLLOW_WALL_HIGH_THRESH
-				&& leftDistance > FOLLOW_WALL_LOW_THRESH) {
-			movPrim.slow();
-			movPrim.drive();
-
 		} else if (leftDistance > FOLLOW_WALL_HIGH_THRESH) {
 			movPrim.turnLeft();
 
 		} else if (leftDistance < FOLLOW_WALL_LOW_THRESH) {
 			movPrim.turnRight();
+		} else {
+			movPrim.slow();
+			movPrim.drive();
 		}
 	}
 }
