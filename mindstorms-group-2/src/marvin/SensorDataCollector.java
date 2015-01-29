@@ -43,7 +43,8 @@ public class SensorDataCollector {
             lastAngle = angle;
             Delay.msDelay(100);
         }
-        configuration.write("brightToDark: " + brightToDarkAngle + " darkToBright: " + darkToBrightAngle + ";");
+        configuration.write("darkToBright: " + darkToBrightAngle + " brightToDark: " + brightToDarkAngle
+                + " lineWidth: " + (brightToDarkAngle - darkToBrightAngle) + ";\r\n\r\n");
         sensorMotor.rotateTo(0, true);
         sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         sensorMotor.waitComplete();

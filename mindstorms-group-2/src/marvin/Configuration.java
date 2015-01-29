@@ -134,8 +134,13 @@ public class Configuration {
         sensorDataFile.close();
     }
 
-    public void write(String data) throws IOException {
-        sensorDataFile.writeUTF(data);
+    public void write(String data) {
+        try {
+            sensorDataFile.writeUTF(data);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            throw new RuntimeException(e);
+        }
     }
 
     public ArrayList<DataSet> getSensorData() {
