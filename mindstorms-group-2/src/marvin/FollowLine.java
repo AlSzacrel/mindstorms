@@ -17,7 +17,6 @@ public class FollowLine implements Step {
         LOST() {
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.crawl();
                 movPrim.backup();
             }
         },
@@ -37,24 +36,6 @@ public class FollowLine implements Step {
                 movPrim.correctionLeft(); // TODO handle better
             }
         },
-
-        TURN_LEFT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.correctionLeft();
-                // movPrim.turnLeft();
-            }
-        },
-
-        TURN_RIGHT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.correctionRight();
-                // movPrim.turnRight();
-            }
-        },
         CORRECTION_LEFT() {
 
             @Override
@@ -70,12 +51,26 @@ public class FollowLine implements Step {
                 movPrim.correctionRight();
             }
         },
+        TURN_LEFT() {
+
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.turnLeft();
+            }
+        },
+
+        TURN_RIGHT() {
+
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.turnRight();
+            }
+        },
         SPIN_LEFT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.correctionLeft();
-                // movPrim.spinLeft();
+                movPrim.spinLeft();
             }
         },
 
@@ -83,8 +78,7 @@ public class FollowLine implements Step {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.correctionRight();
-                // movPrim.spinRight();
+                movPrim.spinRight();
             }
         };
 
@@ -112,9 +106,11 @@ public class FollowLine implements Step {
             if (leftBorder >= 120) {
                 // Line is to the right of center
                 currentCase = StraightCase.SPIN_RIGHT;
-            } else {
+            } else if (rightBorder <= 30) {
                 // Line is to the left of center
                 currentCase = StraightCase.SPIN_LEFT;
+            } else {
+                currentCase = StraightCase.STRAIGHT;
             }
         } else if (lineWidth > 0) {
             // We're still on the line.
