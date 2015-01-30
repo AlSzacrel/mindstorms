@@ -85,6 +85,7 @@ public class SensorDataCollector {
                 dataSet.prepend(new Value(angle, lightValue, distance));
             }
         }
+        leftToRight = !leftToRight;
         return dataSet;
     }
 }
