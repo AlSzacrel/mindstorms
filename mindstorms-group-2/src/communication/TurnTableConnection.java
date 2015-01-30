@@ -47,4 +47,10 @@ public class TurnTableConnection extends BluetoothConnection {
     public void cya() {
         writeInt(TurnTableCommand.CYA.ordinal());
     }
+
+    @Override
+    public void close() {
+        cya();
+        super.close();
+    }
 }

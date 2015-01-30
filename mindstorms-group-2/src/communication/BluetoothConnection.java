@@ -7,7 +7,7 @@ import java.io.IOException;
 import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
 
-public class BluetoothConnection {
+public class BluetoothConnection implements AutoCloseable {
 
     private static final int CLOSE_CONNECTION = 2;
     private final BTConnection connection;
@@ -17,10 +17,10 @@ public class BluetoothConnection {
     public BluetoothConnection(BTConnection connection) {
         super();
         this.connection = connection;
-        // LCD.clear();
         LCD.drawString("Connected", 0, 0);
         dis = connection.openDataInputStream();
         dos = connection.openDataOutputStream();
+        LCD.drawString("Datastreams opened", 0, 0);
     }
 
     /**
@@ -75,10 +75,15 @@ public class BluetoothConnection {
                 dis.close();
                 dos.close();
             } catch (IOException e) {
-                // ignore
+                e.printStackTrace();
             }
         }
         LCD.drawString("Disconnected", 0, 0);
+    }
+
+    @Override
+    public void close() {
+        closeConnection();
     }
 
 }
