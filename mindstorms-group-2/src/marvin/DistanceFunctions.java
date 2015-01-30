@@ -23,7 +23,10 @@ public class DistanceFunctions implements Step {
 	private int leftDistance;
 	private int rightDistance;
 	private int centerDistance;
-
+	private boolean lastTurnCorrectionLeft;
+    private boolean lastTurnCorrectionRight;
+    
+    
 	@Override
 	public void run(Configuration configuration) {
 		movPrim = configuration.getMovementPrimitives();
