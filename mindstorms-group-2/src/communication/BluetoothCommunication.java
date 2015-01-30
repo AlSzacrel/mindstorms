@@ -2,10 +2,12 @@ package communication;
 
 import javax.bluetooth.RemoteDevice;
 
+import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.util.Delay;
+import marvin.CancelUpdater;
 
 /**
  * Example stuff to communicate with a server, in this example with the lift
@@ -27,7 +29,13 @@ public class BluetoothCommunication {
      *            you know what this is for (at least i hope so)
      */
     public static void main(String args[]) {
-        LiftConnection lift = connectToLift();
+        LiftConnection lift = connectToLift(new CancelUpdater() {
+
+            @Override
+            public boolean isCancel() {
+                return Button.ESCAPE.isDown();
+            }
+        });
         lift.goDown();
 
         LCD.drawString("Going down", 0, 1);
@@ -41,16 +49,16 @@ public class BluetoothCommunication {
         lift.closeConnection();
     }
 
-    public static LiftConnection connectToLift() {
-        while (!openConnection(LIFT)) {
+    public static LiftConnection connectToLift(CancelUpdater configuration) {
+        while (!openConnection(LIFT) && !configuration.isCancel()) {
             Delay.msDelay(1000); // waiting for free connection
         }
 
         return new LiftConnection(connection);
     }
 
-    public static TurnTableConnection connectToTurnTable() {
-        while (!openConnection(TURN_TABLE)) {
+    public static TurnTableConnection connectToTurnTable(CancelUpdater configuration) {
+        while (!openConnection(TURN_TABLE) && !configuration.isCancel()) {
             Delay.msDelay(1000); // waiting for free connection
         }
 

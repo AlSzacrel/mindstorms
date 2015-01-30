@@ -16,7 +16,7 @@ import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 
-public class Configuration {
+public class Configuration implements CancelUpdater {
 
     private final class CancelListener implements ButtonListener {
         @Override
@@ -43,7 +43,7 @@ public class Configuration {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final FollowLine followLine;
+    private final Step currentStep;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
 
@@ -58,7 +58,7 @@ public class Configuration {
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        followLine = new FollowLine(movementPrimitives);
+        currentStep = new FollowLine(movementPrimitives);
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -90,9 +90,10 @@ public class Configuration {
     }
 
     public void followLine() {
-        followLine.run(this);
+        currentStep.run(this);
     }
 
+    @Override
     public boolean isCancel() {
         return cancel;
     }

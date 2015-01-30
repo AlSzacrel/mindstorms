@@ -1,10 +1,12 @@
 package tools;
 
-import communication.BluetoothCommunication;
-import communication.LiftConnection;
-
+import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
+import marvin.CancelUpdater;
+
+import communication.BluetoothCommunication;
+import communication.LiftConnection;
 
 /**
  * Example stuff to communicate with a server, in this example with the lift
@@ -22,7 +24,13 @@ public class BluetoothTest {
      */
     public static void main(String args[]) {
         LCD.drawString("Started", 0, 0);
-        LiftConnection lift = BluetoothCommunication.connectToLift();
+        LiftConnection lift = BluetoothCommunication.connectToLift(new CancelUpdater() {
+
+            @Override
+            public boolean isCancel() {
+                return Button.ESCAPE.isDown();
+            }
+        });
         lift.goDown();
 
         LCD.drawString("Going down", 0, 1);
