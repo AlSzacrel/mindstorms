@@ -1,9 +1,7 @@
 package marvin;
-//import MovementPrimitives;
 
 public class FollowLine implements Step {
 
-    private DataSet sensData;
     private final MovementPrimitives movPrim;
 
     public FollowLine(MovementPrimitives movPrim) {
@@ -12,15 +10,13 @@ public class FollowLine implements Step {
 
     @Override
     public void run(Configuration configuration) {
-        sensData = configuration.getLastSensorData();
-        evaluateStraightCase().adjustCourse(movPrim);
+        evaluateStraightCase(configuration).adjustCourse(movPrim);
     }
 
     private enum StraightCase {
         LOST() {
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.crawl();
                 movPrim.backup();
             }
         },
@@ -31,7 +27,6 @@ public class FollowLine implements Step {
             public void adjustCourse(MovementPrimitives movPrim) {
                 movPrim.slow();
             }
-
         },
 
         ORTHOGONAL() {
@@ -41,64 +36,98 @@ public class FollowLine implements Step {
                 movPrim.correctionLeft(); // TODO handle better
             }
         },
-
-        LEFT() {
+        CORRECTION_LEFT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
                 movPrim.correctionLeft();
             }
-
         },
 
-        RIGHT() {
+        CORRECTION_RIGHT() {
 
             @Override
             public void adjustCourse(MovementPrimitives movPrim) {
                 movPrim.correctionRight();
             }
+        },
+        TURN_LEFT() {
 
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.turnLeft();
+            }
+        },
+
+        TURN_RIGHT() {
+
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.turnRight();
+            }
+        },
+        SPIN_LEFT() {
+
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.spinLeft();
+            }
+        },
+
+        SPIN_RIGHT() {
+
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim) {
+                movPrim.spinRight();
+            }
         };
+
         public abstract void adjustCourse(MovementPrimitives movPrim);
 
     }
 
-    private StraightCase evaluateStraightCase() {
-        boolean line = false;
+    private StraightCase evaluateStraightCase(Configuration config) {
         StraightCase currentCase = null;
+        LineBorders lineBorders = config.getLines().get(config.getLines().size() - 1);
+        int rightBorder = lineBorders.getBrightToDark();
+        int leftBorder = lineBorders.getDarkToBright();
+        int lineWidth = rightBorder - leftBorder;
+        float lineCenter = (rightBorder + leftBorder) / 2;
 
-        // case line to the left or
-        if (sensData.get(0).getLightValue() > 350) {
-
-            for (int i = 1; i < sensData.size(); i++) {
-
-                if (sensData.get(i).getLightValue() <= 350) {
-                    currentCase = StraightCase.LEFT;
-                    break;
-
-                } else {
-                    currentCase = StraightCase.ORTHOGONAL;
-                }
+        if (rightBorder == Integer.MIN_VALUE && leftBorder == Integer.MIN_VALUE) {
+            currentCase = StraightCase.LOST;
+        } else if (rightBorder == Integer.MIN_VALUE) {
+            currentCase = StraightCase.TURN_RIGHT;
+        } else if (leftBorder == Integer.MIN_VALUE) {
+            currentCase = StraightCase.TURN_LEFT;
+        } else if (lineWidth > 90) { // TODO: How wide is the line?
+            // Line is too wide, might be orthogonal line or corner.
+            // TODO what is with long lines which have both ends?
+            if (leftBorder >= 120) {
+                // Line is to the right of center
+                currentCase = StraightCase.SPIN_RIGHT;
+            } else if (rightBorder <= 30) {
+                // Line is to the left of center
+                currentCase = StraightCase.SPIN_LEFT;
+            } else {
+                currentCase = StraightCase.STRAIGHT;
+            }
+        } else if (lineWidth > 0) {
+            // We're still on the line.
+            if (64 < lineCenter && lineCenter < 94) {
+                // Line is centrally in front of us.
+                currentCase = StraightCase.STRAIGHT;
+            } else if (lineCenter >= 94) {
+                // Line is to the right of center
+                currentCase = StraightCase.CORRECTION_RIGHT;
+            } else {
+                // Line is to the left of center
+                currentCase = StraightCase.CORRECTION_LEFT;
             }
         } else {
-
-            for (int i = 1; i < sensData.size(); i++) {
-
-                if (sensData.get(i).getLightValue() > 350) {
-                    line = true;
-
-                } else if (line == true) { // Line in center
-                    currentCase = StraightCase.STRAIGHT;
-                    break;
-                }
-            }
-            if (line == true) {
-                currentCase = StraightCase.RIGHT;
-
-            } else {
-                currentCase = StraightCase.LOST;
-            }
+            currentCase = StraightCase.LOST;
         }
+        config.write(currentCase.name());
         return currentCase;
     }
 }
