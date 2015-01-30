@@ -23,8 +23,8 @@ public class DistanceFunctions implements Step {
 	private int leftDistance;
 	private int rightDistance;
 	private int centerDistance;
-	private boolean lastTurnCorrectionLeft;
-    private boolean lastTurnCorrectionRight;
+	private boolean lastTurnCorrectionLeft = false;
+    private boolean lastTurnCorrectionRight = false;
     
     
 	@Override
@@ -89,33 +89,52 @@ public class DistanceFunctions implements Step {
 	public void followLeftWall() {
 		if (!isWallLeft()) {
 			movPrim.turnLeft();
-			Sound.beep();
+			Delay.msDelay(500);
+			movPrim.slow();
+			movPrim.drive();
+			//lastTurnCorrectionLeft = true;
+			//Sound.beep();
 			
 		} else if (leftDistance > FOLLOW_WALL_HIGH_THRESH) {
 			movPrim.turnLeft();
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
+			Delay.msDelay(500);
+			movPrim.turnRight();
+			Delay.msDelay(500);
+			movPrim.slow();
+			movPrim.drive();
+			
+			
+			//lastTurnCorrectionLeft = true;
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
 
 		} else if (leftDistance < FOLLOW_WALL_LOW_THRESH) {
 			movPrim.turnRight();
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
+			Delay.msDelay(500);
+			movPrim.turnLeft();
+			Delay.msDelay(500);
+			movPrim.slow();
+			movPrim.drive();
+			//lastTurnCorrectionRight = true;
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
 			
 		} else {
 			movPrim.slow();
 			movPrim.drive();
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
-			Delay.msDelay(100);
-			Sound.beep();
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
+//			Delay.msDelay(100);
+//			Sound.beep();
 		
 		}
+		
 	}
 }
