@@ -6,6 +6,7 @@ import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.util.Delay;
+import marvin.TurnTableConnection;
 
 /**
  * Example stuff to communicate with a server, in this example with the lift
@@ -16,6 +17,8 @@ import lejos.util.Delay;
 public class BluetoothCommunication {
 
     private static final String LIFT = "Lift";
+    private static final String TURN_TABLE = "TurnTable";
+
     private static BTConnection connection;
 
     /**
@@ -45,6 +48,14 @@ public class BluetoothCommunication {
         }
 
         return new LiftConnection(connection);
+    }
+
+    public static TurnTableConnection connectToTurnTable() {
+        while (!openConnection(TURN_TABLE)) {
+            Delay.msDelay(1000); // waiting for free connection
+        }
+
+        return new TurnTableConnection(connection);
     }
 
     /**
