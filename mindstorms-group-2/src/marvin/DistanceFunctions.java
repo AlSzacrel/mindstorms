@@ -13,7 +13,7 @@ public class DistanceFunctions implements Step {
 	private static final int SIDE_WALL_THRESH = 30;
 	private static final int FRONT_WALL_THRESH = 14; // average 24.2
 	private static final int FOLLOW_WALL_LOW_THRESH = 18;
-	private static final int FOLLOW_WALL_HIGH_THRESH = 25;
+	private static final int FOLLOW_WALL_HIGH_THRESH = 22;
 	private static final int SIDE_EDGE_THRESH = 35; // Können wir das überhaupt
 													// noch wahrnehmen?
 	private static final int FRONT_EDGE_THRESH = 35;
