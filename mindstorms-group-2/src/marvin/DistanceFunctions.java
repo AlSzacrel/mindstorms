@@ -1,5 +1,8 @@
 package marvin;
 
+import lejos.nxt.Sound;
+import lejos.util.Delay;
+
 public class DistanceFunctions implements Step {
 
 	/*
@@ -83,14 +86,33 @@ public class DistanceFunctions implements Step {
 	public void followLeftWall() {
 		if (!isWallLeft()) {
 			movPrim.turnLeft();
+			Sound.beep();
+			
 		} else if (leftDistance > FOLLOW_WALL_HIGH_THRESH) {
 			movPrim.turnLeft();
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
 
 		} else if (leftDistance < FOLLOW_WALL_LOW_THRESH) {
 			movPrim.turnRight();
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
+			
 		} else {
 			movPrim.slow();
 			movPrim.drive();
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
+			Delay.msDelay(100);
+			Sound.beep();
+		
 		}
 	}
 }
