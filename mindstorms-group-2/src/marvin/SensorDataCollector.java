@@ -22,6 +22,10 @@ public class SensorDataCollector {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
         sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        int distance = configuration.getUltraSonic().getDistance();
+        DataSet dataSet = new DataSet(1);
+        dataSet.append(new Value(0, 0, distance));
+        configuration.updateSensorData(dataSet);
         Delay.msDelay(100);
         int lastLightValue = configuration.getLight().getNormalizedLightValue();
         int lastAngle = sensorMotor.getTachoCount();

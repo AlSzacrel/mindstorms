@@ -118,13 +118,13 @@ public class Configuration {
 
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
-        // if (DEBUG_MODE) {
-        // try {
-        // sensorDataFile.writeUTF(dataset.toString());
-        // } catch (IOException exception) {
-        // exception.printStackTrace();
-        // }
-        // }
+        if (DEBUG_MODE) {
+            try {
+                sensorDataFile.writeUTF(dataset.toString());
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
     public NXTRegulatedMotor getLeftWheel() {
