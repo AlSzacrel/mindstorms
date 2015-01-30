@@ -1,44 +1,51 @@
 package marvin;
 
-import java.util.ArrayList;
+import communication.BluetoothCommunication;
+import communication.LiftConnection;
 
 public class ColorDistinction implements Step {
 
-	// rot [435,447]
-	// gr®πne [400,423]
-	private static final int CHANGE_THRESH = 428;
-	private static final int RED_THRESH = 450;
-	private static final int GREEN_THRESH = 400;
-	private boolean bluetoothAccepted = false;
+    // rot [435,447]
+    // gr√ºne [400,423]
+    private static final int CHANGE_THRESH = 428;
+    private static final int RED_THRESH = 450;
+    private static final int GREEN_THRESH = 400;
 
-	@Override
-	public void run(Configuration configuration) {
-		DataSet sensorData = configuration.getLastSensorData();
-		
-		//TODO request bluetooth value
-		float colorAVG = sensorData.get(sensorData.size() - 1).getLightValue();
-		
-		//TODO adjust once also scanning from right to left
-		for(int i = 0; i <= sensorData.size() - 1; i++){
-			colorAVG = Filter.avgEWMA(colorAVG, sensorData.get(i).getLightValue());		
-		}
-		
-		
-		if ((isGreen(colorAVG) && !bluetoothAccepted) || isRed(colorAVG)){
-				configuration.getMovementPrimitives().stop();
+    @Override
+    public void run(Configuration configuration) {
+        configuration.getMovementPrimitives().stop();
+        LiftConnection lift = BluetoothCommunication.connectToLift();
 
-		} else {
-			//TODO call enter elevator function
-		}
-	}	
-	 
-	private boolean isGreen(float color){		
-		return color > GREEN_THRESH && color <= CHANGE_THRESH;		
-	}
+        while (!configuration.isCancel()) {
+            DataSet sensorData = configuration.getSensorDataCollector().collectDataRow();
+            if (sensorData.size() == 0) {
+                return;
+            }
+            // TODO request bluetooth value
+            float color = color(sensorData);
 
-	
-	private boolean isRed(float color){
-		return color > CHANGE_THRESH && color < RED_THRESH;
-	}
+            if (isGreen(color)) {
+                break;
+            }
+        }
+        // TODO drive into elevator
+    }
+
+    private float color(DataSet sensorData) {
+        float colorAVG = sensorData.get(sensorData.size() - 1).getLightValue();
+        // TODO adjust once also scanning from right to left
+        for (int i = 0; i < sensorData.size(); i++) {
+            colorAVG = Filter.avgEWMA(colorAVG, sensorData.get(i).getLightValue());
+        }
+        return colorAVG;
+    }
+
+    private boolean isGreen(float color) {
+        return color > GREEN_THRESH && color <= CHANGE_THRESH;
+    }
+
+    private boolean isRed(float color) {
+        return color > CHANGE_THRESH && color < RED_THRESH;
+    }
 
 }
