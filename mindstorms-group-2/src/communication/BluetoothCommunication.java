@@ -6,7 +6,6 @@ import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.util.Delay;
-import marvin.TurnTableConnection;
 
 /**
  * Example stuff to communicate with a server, in this example with the lift

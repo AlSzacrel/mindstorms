@@ -1,9 +1,7 @@
-package marvin;
+package communication;
 
 import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
-
-import communication.BluetoothConnection;
 
 public class TurnTableConnection extends BluetoothConnection {
 
