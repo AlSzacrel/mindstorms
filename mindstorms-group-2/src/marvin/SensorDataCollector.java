@@ -63,4 +63,28 @@ public class SensorDataCollector {
     private boolean isDark(int lightValue) {
         return !isBright(lightValue);
     }
+
+    public DataSet collectDataRow() {
+        NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
+        sensorMotor.setSpeed(SENSOR_HEAD_SPEED_FACTOR * sensorMotor.getMaxSpeed());
+        if (leftToRight) {
+            sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        } else {
+            sensorMotor.rotateTo(0, true);
+        }
+
+        DataSet dataSet = new DataSet(50);
+        while (sensorMotor.isMoving() && !configuration.isCancel()) {
+            Delay.msDelay(MEASURE_INTERVAL);
+            Integer angle = sensorMotor.getTachoCount();
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            int distance = configuration.getUltraSonic().getDistance();
+            if (leftToRight) {
+                dataSet.append(new Value(angle, lightValue, distance));
+            } else {
+                dataSet.prepend(new Value(angle, lightValue, distance));
+            }
+        }
+        return dataSet;
+    }
 }
