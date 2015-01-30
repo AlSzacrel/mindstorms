@@ -3,9 +3,9 @@ package marvin;
 public class MovementPrimitives {
     private static final float CORRECTION_FACTOR = 0.75f;
     private static final float TURN_FACTOR = 0.5f;
-    private static final float SPIN_FACTOR = 0.25f;
+    private static final float SPIN_FACTOR = 1f;
     private static final float SPEED_FACTOR_FULL = 0.5f;
-    private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 4f;
+    private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 3f;
     private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
     private float speed = 0;
@@ -13,6 +13,7 @@ public class MovementPrimitives {
 
     public MovementPrimitives(Configuration conf) {
         this.conf = conf;
+        slow();
     }
 
     public void fullSpeed() {
@@ -42,8 +43,8 @@ public class MovementPrimitives {
     }
 
     public void stop() {
-        speed = 0;
-        drive();
+        conf.getLeftWheel().stop();
+        conf.getRightWheel().stop();
     }
 
     public void correctionLeft() {
