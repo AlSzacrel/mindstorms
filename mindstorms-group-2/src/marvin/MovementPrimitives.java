@@ -12,6 +12,7 @@ public class MovementPrimitives {
 
     public MovementPrimitives(Configuration conf) {
         this.conf = conf;
+        slow();
     }
 
     public void fullSpeed() {
