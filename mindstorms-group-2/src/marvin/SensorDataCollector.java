@@ -93,5 +93,6 @@ public class SensorDataCollector {
 
     public void turnToRightMaximum() {
         configuration.getSensorMotor().rotate(MEASURE_INTERVAL);
+        leftToRight = false;
     }
 }
