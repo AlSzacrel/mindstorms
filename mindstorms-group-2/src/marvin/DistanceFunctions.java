@@ -1,5 +1,6 @@
 package marvin;
 
+import lejos.nxt.LightSensor;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
@@ -58,12 +59,23 @@ public class DistanceFunctions implements Step {
         // TODO change direction when distance to wall decreases
         TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
+        LightSensor light = configuration.getLight();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         while (!configuration.isCancel()) {
             normalCorrection(movement, ultraSonic);
             detectWall(movement, rightTouchSensor);
+            if (detectBarcode(light)) {
+                // TODO switch to next step in configuration
+            }
             scanNumber++;
         }
+    }
+
+    private boolean detectBarcode(LightSensor light) {
+        // TODO detect line borders and count them. There must be 3 from dark to
+        // bright and 3 from bright to dark
+        // TODO use similar mechanism as in FollowLine
+        return false;
     }
 
     private void detectWall(MovementPrimitives movement, TouchSensor rightTouchSensor) {
