@@ -17,14 +17,22 @@ public class Marvin {
         // RConsole.openUSB(0);
         // RConsole.println("collect data");
         // RConsole.println(configuration.getLines().toString());
+        DistanceFunctions distanceFunctions = new DistanceFunctions();
         while (running) {
             cancelRun();
             configuration.displayInformation();
-            configuration.getSensorDataCollector().collectData();
-            configuration.getMovementPrimitives().slow();
+            configuration.getMovementPrimitives().crawl();
             configuration.getMovementPrimitives().drive();
-            //configuration.followLine();
-            configuration.followLeftWall();
+            distanceFunctions.run(configuration);
+
+            // DataSet dataRow =
+            // configuration.getSensorDataCollector().collectDataRow();
+            // RConsole.println(dataRow.toString());
+            // configuration.getSensorDataCollector().collectData();
+            // configuration.getMovementPrimitives().slow();
+            // configuration.getMovementPrimitives().drive();
+            // configuration.followLine();
+            // configuration.followLeftWall();
             Delay.msDelay(500);
             configuration.getMovementPrimitives().stop();
         }

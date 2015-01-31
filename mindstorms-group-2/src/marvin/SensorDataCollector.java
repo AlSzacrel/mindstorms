@@ -7,12 +7,14 @@ import lejos.util.Delay;
 
 public class SensorDataCollector {
 
+    private static final float SENSOR_HEAD_SPEED_FACTOR = 1f;
+    private static final int MEASURE_INTERVAL = 5;
     private static final int BRIGHT_THRESHOLD = 350;
     // private static final int MAX_ANGLE_STEPS = 5;
     // private static final int STEP_SIZE = 175 / 5;
     private final Configuration configuration;
 
-    private final boolean leftToRight = true;
+    private boolean leftToRight = true;
 
     public SensorDataCollector(Configuration configuration) {
         this.configuration = configuration;
@@ -76,7 +78,7 @@ public class SensorDataCollector {
         DataSet dataSet = new DataSet(50);
         while (sensorMotor.isMoving() && !configuration.isCancel()) {
             Delay.msDelay(MEASURE_INTERVAL);
-            Integer angle = sensorMotor.getTachoCount();
+            Integer angle = sensorMotor.getPosition();
             int lightValue = configuration.getLight().getNormalizedLightValue();
             int distance = configuration.getUltraSonic().getDistance();
             if (leftToRight) {
@@ -87,5 +89,9 @@ public class SensorDataCollector {
         }
         leftToRight = !leftToRight;
         return dataSet;
+    }
+
+    public void turnToRightMaximum() {
+        configuration.getSensorMotor().rotate(MEASURE_INTERVAL);
     }
 }

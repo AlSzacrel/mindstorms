@@ -86,4 +86,11 @@ public class MovementPrimitives {
         conf.getLeftWheel().forward();
         conf.getRightWheel().backward();
     }
+
+    public void correct(int correctionFactor) {
+        conf.getLeftWheel().setSpeed(speed - correctionFactor);
+        conf.getRightWheel().setSpeed(speed + correctionFactor);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().forward();
+    }
 }
