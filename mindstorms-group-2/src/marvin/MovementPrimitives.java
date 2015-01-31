@@ -41,8 +41,8 @@ public class MovementPrimitives {
     }
 
     public void stop() {
-        speed = 0;
-        drive();
+        conf.getLeftWheel().stop();
+        conf.getRightWheel().stop();
     }
 
     public void correctionLeft() {
