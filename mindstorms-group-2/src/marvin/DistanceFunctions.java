@@ -18,11 +18,16 @@ public class DistanceFunctions implements Step {
     private static final int SIDE_EDGE_THRESH = 35; // Können wir das überhaupt
     // noch wahrnehmen?
     private static final int FRONT_EDGE_THRESH = 35;
+
+    // new constants
     private static final int THRESHOLD = 27;
     private static final int SEARCH_THRESHOLD = 50;
-    private static final int GAIN = 20;
-    private static final int MIN_CORRECTION = -200;
-    private static final int MAX_CORRECTION = 200;
+    private static final int GAIN = 15;
+    private static final int MAX_CORRECTION = 150;
+    private static final int MIN_CORRECTION = -MAX_CORRECTION;
+    private static final int WALL_DETECTION_COUNT = 12;
+    private static final int MAX_WALL_DETECTION_VALUES = 5;
+    private static final int FRONT_DETECTION_THRESHOLD = 32;
 
     private MovementPrimitives movement;
     private DataSet data;
@@ -31,6 +36,7 @@ public class DistanceFunctions implements Step {
     private int centerDistance;
     private final boolean lastTurnCorrectionLeft = false;
     private final boolean lastTurnCorrectionRight = false;
+    private int scanNumber = 0;
 
     @Override
     public void run(Configuration configuration) {
@@ -48,23 +54,48 @@ public class DistanceFunctions implements Step {
         rightDistance = data.get(data.size() - 1).getDistance();
         centerDistance = data.get(data.size() / 2).getDistance();
 
-        dataCollector.turnToRightMaximum();
         // TODO change direction when distance to wall decreases
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         while (!configuration.isCancel()) {
-            int distance = ultraSonic.getDistance();
-            if (distance > SEARCH_THRESHOLD) {
-                searchWall(movement);
-            }
-            int correctionFactor = THRESHOLD - distance;
-            int gainedCorrection = correctionFactor * GAIN;
-            int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
-            limittedCorrection = Math.min(limittedCorrection, MAX_CORRECTION);
-            movement.correct(limittedCorrection);
-            RConsole.println("d: " + distance + " f: " + correctionFactor + " g: " + gainedCorrection + " l: "
-                    + limittedCorrection);
+            normalCorrection(movement, ultraSonic);
+            detectWall(movement, dataCollector, ultraSonic);
+            scanNumber++;
         }
+    }
+
+    private void detectWall(MovementPrimitives movement, SensorDataCollector dataCollector, UltrasonicSensor ultraSonic) {
+        if (scanNumber % WALL_DETECTION_COUNT != 0) {
+            return;
+        }
+
+        dataCollector.turnToMiddle();
+        int distance = 0;
+        for (int number = 0; number < MAX_WALL_DETECTION_VALUES; number++) {
+            distance += ultraSonic.getDistance();
+            Delay.msDelay(5);
+        }
+        distance /= MAX_WALL_DETECTION_VALUES;
+        if (distance < FRONT_DETECTION_THRESHOLD) {
+            movement.stop();
+            movement.spinLeft();
+            Delay.msDelay(300);
+        }
+        dataCollector.turnToRightMaximum();
+    }
+
+    private void normalCorrection(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+        int distance = ultraSonic.getDistance();
+        if (distance > SEARCH_THRESHOLD) {
+            searchWall(movement);
+        }
+        int correctionFactor = THRESHOLD - distance;
+        int gainedCorrection = correctionFactor * GAIN;
+        int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
+        limittedCorrection = Math.min(limittedCorrection, MAX_CORRECTION);
+        movement.correct(limittedCorrection);
+        RConsole.println("d: " + distance + " f: " + correctionFactor + " g: " + gainedCorrection + " l: "
+                + limittedCorrection);
     }
 
     private void searchWall(MovementPrimitives movement) {

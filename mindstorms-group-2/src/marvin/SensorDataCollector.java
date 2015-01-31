@@ -92,7 +92,11 @@ public class SensorDataCollector {
     }
 
     public void turnToRightMaximum() {
-        configuration.getSensorMotor().rotate(MEASURE_INTERVAL);
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE);
         leftToRight = false;
+    }
+
+    public void turnToMiddle() {
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE / 2);
     }
 }
