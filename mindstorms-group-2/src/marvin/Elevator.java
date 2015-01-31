@@ -16,6 +16,7 @@ public class Elevator implements Step {
     public void run(Configuration configuration) {
         MovementPrimitives movement = configuration.getMovementPrimitives();
         configuration.getLight().setFloodlight(false);
+        movement.slow();
         movement.stop();
         try (LiftConnection lift = BluetoothCommunication.connectToLift(configuration)) {
             while (!configuration.isCancel()) {
@@ -32,13 +33,15 @@ public class Elevator implements Step {
 
             // TODO drive into elevator
             movement.drive();
-            Delay.msDelay(500);
+            Delay.msDelay(4000);
             movement.stop();
+            Delay.msDelay(2000);
             lift.goDown();
             while (!lift.canExit()) {
                 Delay.msDelay(1000);
             }
             movement.drive();
+            Delay.msDelay(5000);
         }
     }
 
