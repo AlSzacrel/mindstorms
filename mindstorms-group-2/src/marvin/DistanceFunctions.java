@@ -1,5 +1,6 @@
 package marvin;
 
+import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
 import lejos.util.Delay;
@@ -20,13 +21,13 @@ public class DistanceFunctions implements Step {
     private static final int FRONT_EDGE_THRESH = 35;
 
     // new constants
-    private static final int THRESHOLD = 27;
+    private static final int SIDE_WALL_THRESHOLD = 30;
     private static final int SEARCH_THRESHOLD = 50;
     private static final int GAIN = 15;
-    private static final int MAX_CORRECTION = 150;
+    private static final int MAX_CORRECTION = 100;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
-    private static final int WALL_DETECTION_COUNT = 12;
-    private static final int MAX_WALL_DETECTION_VALUES = 5;
+    private static final int WALL_DETECTION_COUNT = 40;
+    private static final int MAX_WALL_DETECTION_VALUES = 10;
     private static final int FRONT_DETECTION_THRESHOLD = 32;
 
     private MovementPrimitives movement;
@@ -55,33 +56,27 @@ public class DistanceFunctions implements Step {
         centerDistance = data.get(data.size() / 2).getDistance();
 
         // TODO change direction when distance to wall decreases
+        TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         while (!configuration.isCancel()) {
             normalCorrection(movement, ultraSonic);
-            detectWall(movement, dataCollector, ultraSonic);
+            detectWall(movement, rightTouchSensor);
             scanNumber++;
         }
     }
 
-    private void detectWall(MovementPrimitives movement, SensorDataCollector dataCollector, UltrasonicSensor ultraSonic) {
-        if (scanNumber % WALL_DETECTION_COUNT != 0) {
+    private void detectWall(MovementPrimitives movement, TouchSensor rightTouchSensor) {
+        if (!rightTouchSensor.isPressed()) {
             return;
         }
-
-        dataCollector.turnToMiddle();
-        int distance = 0;
-        for (int number = 0; number < MAX_WALL_DETECTION_VALUES; number++) {
-            distance += ultraSonic.getDistance();
-            Delay.msDelay(5);
-        }
-        distance /= MAX_WALL_DETECTION_VALUES;
-        if (distance < FRONT_DETECTION_THRESHOLD) {
-            movement.stop();
-            movement.spinLeft();
-            Delay.msDelay(300);
-        }
-        dataCollector.turnToRightMaximum();
+        movement.stop();
+        movement.backup();
+        Delay.msDelay(1000);
+        movement.spinLeft();
+        Delay.msDelay(600);
+        movement.stop();
+        movement.drive();
     }
 
     private void normalCorrection(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
@@ -89,7 +84,7 @@ public class DistanceFunctions implements Step {
         if (distance > SEARCH_THRESHOLD) {
             searchWall(movement);
         }
-        int correctionFactor = THRESHOLD - distance;
+        int correctionFactor = SIDE_WALL_THRESHOLD - distance;
         int gainedCorrection = correctionFactor * GAIN;
         int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
         limittedCorrection = Math.min(limittedCorrection, MAX_CORRECTION);

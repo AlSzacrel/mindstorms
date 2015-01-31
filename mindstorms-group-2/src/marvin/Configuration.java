@@ -14,6 +14,7 @@ import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 
 public class Configuration {
@@ -47,9 +48,11 @@ public class Configuration {
     private final DistanceFunctions followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
+    private final TouchSensor rightTouchSensor;
 
     public Configuration() throws IOException {
         super();
+        rightTouchSensor = new TouchSensor(SensorPort.S1);
         light = new LightSensor(SensorPort.S4);
         ultraSonic = new UltrasonicSensor(SensorPort.S2);
         leftWheel = Motor.B;
@@ -69,6 +72,11 @@ public class Configuration {
         }
         file.createNewFile();
         sensorDataFile = new DataOutputStream(new FileOutputStream(file));
+    }
+
+    public TouchSensor getRightTouchSensor() {
+        return rightTouchSensor;
+
     }
 
     public LightSensor getLight() {
