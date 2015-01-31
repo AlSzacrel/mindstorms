@@ -141,6 +141,7 @@ public class Configuration {
             sensorDataFile.flush();
         }
         sensorDataFile.close();
+        sensorMotor.rotateTo(0);
     }
 
     public void write(String data) {
