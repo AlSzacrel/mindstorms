@@ -31,8 +31,8 @@ public class Elevator implements Step {
                 Delay.msDelay(200);
             }
 
-            // TODO drive into elevator
             movement.drive();
+            // TODO detect stop, use distance sensor
             Delay.msDelay(4000);
             movement.stop();
             Delay.msDelay(2000);
@@ -41,7 +41,10 @@ public class Elevator implements Step {
                 Delay.msDelay(1000);
             }
             movement.drive();
+            // TODO make sure Marvin gets out of the elevator
             Delay.msDelay(5000);
+        } finally {
+            configuration.getLight().setFloodlight(true);
         }
     }
 
