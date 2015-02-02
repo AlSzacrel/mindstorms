@@ -17,6 +17,7 @@ public class FollowEdge  implements Step{
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
         
         //TODO: Do we need left edge detection, too?
+        movement.crawl();
         sensorDataCollector.turnToRightEdgeDetection();
         followEdge(movement, ultraSonic);
 
