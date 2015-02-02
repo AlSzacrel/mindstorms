@@ -2,6 +2,7 @@ package marvin;
 
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
+import lejos.util.Delay;
 
 public class FollowEdge  implements Step{
 	
@@ -15,6 +16,7 @@ public class FollowEdge  implements Step{
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
         
+        //TODO: Do we need left edge detection, too?
         sensorDataCollector.turnToRightEdgeDetection();
         followEdge(movement, ultraSonic);
 
@@ -34,15 +36,27 @@ public class FollowEdge  implements Step{
 	}
 	private void followEdge(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
 		
-		for (int i = 0; i < 5; i++) {
-			if (ultraSonic.getDistance() != 255) {
-				
-			}
-		}
+		// get a mean distance value
+		float medDistance = ultraSonic.getDistance();
+		int currentDistance;
 		
-		
-		if (true){
+		for (int i = 0; i < 6; i++) {
+			Delay.msDelay(5);
+			currentDistance = ultraSonic.getDistance();
 			
+			if (currentDistance != 255) {
+				medDistance = Filter.avgEWMA(medDistance, currentDistance);
+			}
+		}		
+		
+		// If there is an edge
+		if (medDistance > SIDE_EDGE_THRESHOLD){
+	        movement.correct(15); //TODO change magic number
+			
+		// If there is no edge
+		} else {
+	        movement.correct(-15);
+			Delay.msDelay(20);
 		}
 		
 		
