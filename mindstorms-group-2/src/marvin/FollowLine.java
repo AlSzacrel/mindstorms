@@ -9,22 +9,24 @@ public class FollowLine implements Step {
 
     private final MovementPrimitives movPrim;
     private final LinkedList<StraightCase> caseHistory;
-
+    private final LinkedList<Float> lineCenterHistory;
+    
     public FollowLine(MovementPrimitives movPrim) {
         this.movPrim = movPrim;
         this.caseHistory = new LinkedList<StraightCase>();
+        this.lineCenterHistory = new LinkedList<Float>();
     }
 
     @Override
     public void run(Configuration configuration) {
         configuration.getSensorDataCollector().collectData();
-        evaluateStraightCase(configuration).adjustCourse(movPrim, caseHistory);
+        evaluateStraightCase(configuration).adjustCourse(movPrim, caseHistory, lineCenterHistory);
     }
 
     private enum StraightCase {
         LOST() {
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 RConsole.println(caseHistory.toString());
                 int historySize = caseHistory.size();
                 RConsole.println("Set slow");
@@ -61,7 +63,7 @@ public class FollowLine implements Step {
         STRAIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.slow();
                 movPrim.drive();
             }
@@ -70,14 +72,21 @@ public class FollowLine implements Step {
         ORTHOGONAL() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.correctionLeft(); // TODO handle better
             }
+        },
+        ON_LINE() {
+            @Override
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
+                movPrim.correct((int)(Configuration.MAX_ANGLE / 2 - lineCenterHistory.get(lineCenterHistory.size() -1)));
+            }
+        
         },
         CORRECTION_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.correctionLeft();
             }
         },
@@ -85,14 +94,14 @@ public class FollowLine implements Step {
         CORRECTION_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.correctionRight();
             }
         },
         TURN_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.turnLeft();
             }
         },
@@ -100,14 +109,14 @@ public class FollowLine implements Step {
         TURN_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.turnRight();
             }
         },
         SPIN_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.spinLeft();
             }
         },
@@ -115,12 +124,12 @@ public class FollowLine implements Step {
         SPIN_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
                 movPrim.spinRight();
             }
         };
 
-        public abstract void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory);
+        public abstract void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory);
 
     }
 
@@ -129,47 +138,20 @@ public class FollowLine implements Step {
         LineBorders lineBorders = config.getLines().get(config.getLines().size() - 1);
         int rightBorder = lineBorders.getBrightToDark();
         int leftBorder = lineBorders.getDarkToBright();
-        int lineWidth = rightBorder - leftBorder;
         float lineCenter = (rightBorder + leftBorder) / 2;
 
         if (rightBorder == Integer.MIN_VALUE && leftBorder == Integer.MIN_VALUE) {
             currentCase = StraightCase.LOST;
-        } else if (rightBorder == Integer.MIN_VALUE) {
-            currentCase = StraightCase.TURN_RIGHT;
-        } else if (leftBorder == Integer.MIN_VALUE) {
-            currentCase = StraightCase.TURN_LEFT;
-        } else if (lineWidth > 90) { // TODO: How wide is the line?
-            // Line is too wide, might be orthogonal line or corner.
-            // TODO what is with long lines which have both ends?
-            if (leftBorder >= 120) {
-                // Line is to the right of center
-                currentCase = StraightCase.SPIN_RIGHT;
-            } else if (rightBorder <= 30) {
-                // Line is to the left of center
-                currentCase = StraightCase.SPIN_LEFT;
-            } else {
-                currentCase = StraightCase.STRAIGHT;
-            }
-        } else if (lineWidth > 0) {
-            // We're still on the line.
-            if (64 < lineCenter && lineCenter < 94) {
-                // Line is centrally in front of us.
-                currentCase = StraightCase.STRAIGHT;
-            } else if (lineCenter >= 94) {
-                // Line is to the right of center
-                currentCase = StraightCase.CORRECTION_RIGHT;
-            } else {
-                // Line is to the left of center
-                currentCase = StraightCase.CORRECTION_LEFT;
-            }
         } else {
-            currentCase = StraightCase.LOST;
+        	lineCenter = Math.max(lineCenter,0);
+        	currentCase = StraightCase.ON_LINE;
         }
         config.write(currentCase.name());
         if (caseHistory.size() > 30) {
             caseHistory.remove(0);
         }
         caseHistory.add(currentCase);
+        lineCenterHistory.add(lineCenter);
         return currentCase;
     }
 }
