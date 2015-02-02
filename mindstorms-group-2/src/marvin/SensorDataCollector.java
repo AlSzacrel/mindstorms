@@ -110,6 +110,20 @@ public class SensorDataCollector {
         configuration.getSensorMotor().rotateTo(0);
         leftToRight = true;
     }
+    
+
+
+    public void turnToLeftEdgeDetection() {
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE - Configuration.EDGE_DETECTION_ANGLE);
+        leftToRight = true;
+    }
+    
+
+
+    public void turnToRightEdgeDetection() {
+        configuration.getSensorMotor().rotateTo(Configuration.EDGE_DETECTION_ANGLE);
+        leftToRight = true;
+    }
 
     public void turnToCenter() {
         configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE / 2);
