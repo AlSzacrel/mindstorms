@@ -17,6 +17,7 @@ public class FollowLine implements Step {
 
     @Override
     public void run(Configuration configuration) {
+        configuration.getSensorDataCollector().collectData();
         evaluateStraightCase(configuration).adjustCourse(movPrim, caseHistory);
     }
 

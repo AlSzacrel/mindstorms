@@ -92,4 +92,11 @@ public class MovementPrimitives {
         conf.getLeftWheel().waitComplete();
         conf.getRightWheel().waitComplete();
     }
+
+    public void correct(int correctionFactor) {
+        conf.getLeftWheel().setSpeed(speed - correctionFactor);
+        conf.getRightWheel().setSpeed(speed + correctionFactor);
+        conf.getLeftWheel().forward();
+        conf.getRightWheel().forward();
+    }
 }

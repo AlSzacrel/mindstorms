@@ -1,7 +1,5 @@
 package marvin;
 
-import java.io.IOException;
-
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
 
@@ -20,7 +18,7 @@ public class SensorDataCollector {
         this.configuration = configuration;
     }
 
-    public void collectData() throws IOException {
+    public void collectData() {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
         sensorMotor.setSpeed(SENSOR_HEAD_SPEED_FACTOR * sensorMotor.getMaxSpeed());
         configuration.addNewLine(scan(sensorMotor));
@@ -70,11 +68,50 @@ public class SensorDataCollector {
         return new LineBorders(darkToBrightAngle, brightToDarkAngle, minAngle, maxAngle);
     }
 
-    private boolean isBright(int lightValue) {
+    public boolean isBright(int lightValue) {
         return lightValue > BRIGHT_THRESHOLD;
     }
 
-    private boolean isDark(int lightValue) {
+    public boolean isDark(int lightValue) {
         return !isBright(lightValue);
+    }
+
+    public DataSet collectDataRow() {
+        NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
+        sensorMotor.setSpeed(SENSOR_HEAD_SPEED_FACTOR * sensorMotor.getMaxSpeed());
+        if (leftToRight) {
+            sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        } else {
+            sensorMotor.rotateTo(0, true);
+        }
+
+        DataSet dataSet = new DataSet(50);
+        while (sensorMotor.isMoving() && !configuration.isCancel()) {
+            Delay.msDelay(MEASURE_INTERVAL);
+            Integer angle = sensorMotor.getPosition();
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            int distance = configuration.getUltraSonic().getDistance();
+            if (leftToRight) {
+                dataSet.append(new Value(angle, lightValue, distance));
+            } else {
+                dataSet.prepend(new Value(angle, lightValue, distance));
+            }
+        }
+        leftToRight = !leftToRight;
+        return dataSet;
+    }
+
+    public void turnToRightMaximum() {
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE);
+        leftToRight = false;
+    }
+
+    public void turnToLeftMaximum() {
+        configuration.getSensorMotor().rotateTo(0);
+        leftToRight = true;
+    }
+
+    public void turnToCenter() {
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE / 2);
     }
 }
