@@ -1,7 +1,5 @@
 package marvin;
 
-import java.io.IOException;
-
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
 
@@ -20,7 +18,7 @@ public class SensorDataCollector {
         this.configuration = configuration;
     }
 
-    public void collectData() throws IOException {
+    public void collectData() {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
         sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
@@ -58,11 +56,11 @@ public class SensorDataCollector {
         configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle));
     }
 
-    private boolean isBright(int lightValue) {
+    public boolean isBright(int lightValue) {
         return lightValue > BRIGHT_THRESHOLD;
     }
 
-    private boolean isDark(int lightValue) {
+    public boolean isDark(int lightValue) {
         return !isBright(lightValue);
     }
 

@@ -45,10 +45,12 @@ public class Configuration {
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
     private final FollowLine followLine;
-    private final DistanceFunctions followLeftWall;
+    private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
     private final TouchSensor rightTouchSensor;
+    private final ArrayList<Step> steps = new ArrayList<>();
+    private Step currentStep;
 
     public Configuration() throws IOException {
         super();
@@ -63,7 +65,7 @@ public class Configuration {
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
         followLine = new FollowLine(movementPrimitives);
-        followLeftWall = new DistanceFunctions();
+        followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -183,6 +185,28 @@ public class Configuration {
 
     public List<LineBorders> getLines() {
         return lines;
+    }
+
+    public void addStep(Step step) {
+        if (currentStep == null) {
+            currentStep = step;
+            return;
+        }
+        steps.add(step);
+    }
+
+    public void nextStep() {
+        if (steps.isEmpty()) {
+            return;
+        }
+        currentStep = steps.remove(0);
+    }
+
+    public void runCurrentStep() {
+        if (currentStep == null) {
+            return;
+        }
+        currentStep.run(this);
     }
 
 }

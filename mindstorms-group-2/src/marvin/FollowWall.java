@@ -1,11 +1,12 @@
 package marvin;
 
 import lejos.nxt.LightSensor;
+import lejos.nxt.Sound;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.util.Delay;
 
-public class DistanceFunctions implements Step {
+public class FollowWall implements Step {
 
     /*
      * Perceptable Data Range: [3;31] 3 is hend in front of sensor meassured
@@ -19,6 +20,9 @@ public class DistanceFunctions implements Step {
     private static final int GAIN = 15;
     private static final int MAX_CORRECTION = 100;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
+    private int lastLightValue;
+    private int lineBeginning = 0;
+    private int lineEnding = 0;
 
     @Override
     public void run(Configuration configuration) {
@@ -35,20 +39,36 @@ public class DistanceFunctions implements Step {
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
         LightSensor light = configuration.getLight();
         MovementPrimitives movement = configuration.getMovementPrimitives();
-        while (!configuration.isCancel()) {
-            followWall(movement, ultraSonic);
-            detectWall(movement, rightTouchSensor);
-            if (detectBarcode(light)) {
-                // TODO switch to next step in configuration
-            }
+        SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
+        followWall(movement, ultraSonic);
+        detectWall(movement, rightTouchSensor);
+        if (detectBarcode(light, sensorDataCollector)) {
+            Sound.beep();
+            Sound.beep();
+            configuration.nextStep();
         }
     }
 
-    private boolean detectBarcode(LightSensor light) {
+    private boolean detectBarcode(LightSensor light, SensorDataCollector sensor) {
+        int lightValue = light.getNormalizedLightValue();
         // TODO detect line borders and count them. There must be 3 from dark to
         // bright and 3 from bright to dark
+        if (sensor.isDark(lastLightValue) && sensor.isBright(lightValue)) {
+            // switched from dark to bright --> line starts
+            lineBeginning++;
+            Sound.beep();
+            Sound.beep();
+        }
+        if (sensor.isBright(lastLightValue) && sensor.isDark(lightValue)) {
+            // switched from dark to bright --> line ends
+            lineEnding++;
+            Sound.beep();
+            Sound.beep();
+            Sound.beep();
+        }
         // TODO use similar mechanism as in FollowLine
-        return false;
+        lastLightValue = lightValue;
+        return lineBeginning >= 3 && lineEnding >= 3;
     }
 
     private void detectWall(MovementPrimitives movement, TouchSensor rightTouchSensor) {
@@ -57,7 +77,7 @@ public class DistanceFunctions implements Step {
         }
         movement.stop();
         movement.backup();
-        Delay.msDelay(1000);
+        Delay.msDelay(2000);
         movement.spinLeft();
         Delay.msDelay(600);
         movement.stop();

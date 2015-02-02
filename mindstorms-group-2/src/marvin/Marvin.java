@@ -2,8 +2,6 @@ package marvin;
 
 import java.io.IOException;
 
-import lejos.util.Delay;
-
 public class Marvin {
 
     private boolean running = true;
@@ -17,13 +15,13 @@ public class Marvin {
         // RConsole.openUSB(0);
         // RConsole.println("collect data");
         // RConsole.println(configuration.getLines().toString());
-        DistanceFunctions distanceFunctions = new DistanceFunctions();
+        configuration.getMovementPrimitives().crawl();
         while (running) {
             cancelRun();
             configuration.displayInformation();
-            configuration.getMovementPrimitives().crawl();
-            configuration.getMovementPrimitives().drive();
-            distanceFunctions.run(configuration);
+            // configuration.getMovementPrimitives().crawl();
+            // configuration.getMovementPrimitives().drive();
+            configuration.runCurrentStep();
 
             // DataSet dataRow =
             // configuration.getSensorDataCollector().collectDataRow();
@@ -33,8 +31,8 @@ public class Marvin {
             // configuration.getMovementPrimitives().drive();
             // configuration.followLine();
             // configuration.followLeftWall();
-            Delay.msDelay(500);
-            configuration.getMovementPrimitives().stop();
+            // Delay.msDelay(500);
+            // configuration.getMovementPrimitives().stop();
         }
         configuration.save();
     }
