@@ -66,7 +66,6 @@ public class Configuration implements CancelUpdater {
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        currentStep = new FollowLine(movementPrimitives);
         followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());

@@ -11,7 +11,6 @@ public class FollowEdge  implements Step{
 
 	@Override
 	public void run(Configuration configuration) {
-        configuration.getSensorDataCollector().turnToLeftEdgeDetection();
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
