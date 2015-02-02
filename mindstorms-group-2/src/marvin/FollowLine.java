@@ -1,157 +1,117 @@
 package marvin;
 
-import java.util.LinkedList;
-
+import lejos.nxt.LightSensor;
+import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.comm.RConsole;
-import lejos.util.Delay;
 
 public class FollowLine implements Step {
 
-    private final MovementPrimitives movPrim;
-    private final LinkedList<StraightCase> caseHistory;
-    private final LinkedList<Float> lineCenterHistory;
-    
-    public FollowLine(MovementPrimitives movPrim) {
-        this.movPrim = movPrim;
-        this.caseHistory = new LinkedList<StraightCase>();
-        this.lineCenterHistory = new LinkedList<Float>();
-    }
+    private static final int SPEED = 150;
+    private static final float GAIN = 0.5f;
+    private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
+    private static final int LOW_THRESHOLD = 5;
+    private int lostNumber = 0;
 
     @Override
     public void run(Configuration configuration) {
-        configuration.getSensorDataCollector().collectData();
-        evaluateStraightCase(configuration).adjustCourse(movPrim, caseHistory, lineCenterHistory);
+        MovementPrimitives movement = configuration.getMovementPrimitives();
+        // stupidVersion(configuration);
+        LineBorders lineData = configuration.getSensorDataCollector().collectLineData();
+
+        int leftBorder = lineData.getDarkToBright();
+        int rightBorder = lineData.getBrightToDark();
+
+        if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
+            // help we are lost
+            lost(configuration);
+            return;
+        }
+        lostNumber = 0;
+
+        int center = (leftBorder + rightBorder) / 2;
+
+        int correctionFactor = ((Configuration.MAX_ANGLE / 2) - center);
+        int gainedFactor = (int) (correctionFactor * GAIN);
+
+        RConsole.println("" + gainedFactor);
+        movement.correct(gainedFactor);
+
+        // evaluateStraightCase(configuration).adjustCourse(movPrim,
+        // caseHistory, lineCenterHistory);
     }
 
-    private enum StraightCase {
-        LOST() {
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                RConsole.println(caseHistory.toString());
-                int historySize = caseHistory.size();
-                RConsole.println("Set slow");
-                movPrim.fullSpeed();
-                if (historySize > 1 && caseHistory.get(historySize - 2) != LOST) {
-                    RConsole.println("case 1");
-                    movPrim.spinLeft();
-                    Delay.msDelay(200);
-                } else if (historySize > 2 && caseHistory.get(historySize - 3) != LOST) {
-                    RConsole.println("case 2");
-                    movPrim.spinRight();
-                    Delay.msDelay(200);
-                } else if (historySize > 3 && caseHistory.get(historySize - 4) != LOST) {
-                    RConsole.println("case 3");
-                    movPrim.spinRight();
-                    Delay.msDelay(200);
-                } else if (historySize > 4 && caseHistory.get(historySize - 5) != LOST) {
-                    RConsole.println("case 4");
-                    movPrim.spinLeft();
-                    Delay.msDelay(200);
-                } else {
-                    movPrim.slow();
-                    RConsole.println("else case");
-                    movPrim.backup();
-                }
-                RConsole.println("before delay");
-                Delay.msDelay(200);
-                RConsole.println("stop");
-                movPrim.stop();
-                movPrim.slow();
-            }
-        },
+    private void lost(Configuration configuration) {
+        lostNumber++;
+        searchRightOfLine(configuration);
 
-        STRAIGHT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.slow();
-                movPrim.drive();
-            }
-        },
-
-        ORTHOGONAL() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.correctionLeft(); // TODO handle better
-            }
-        },
-        ON_LINE() {
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.correct((int)(Configuration.MAX_ANGLE / 2 - lineCenterHistory.get(lineCenterHistory.size() -1)));
-            }
-        
-        },
-        CORRECTION_LEFT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.correctionLeft();
-            }
-        },
-
-        CORRECTION_RIGHT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.correctionRight();
-            }
-        },
-        TURN_LEFT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.turnLeft();
-            }
-        },
-
-        TURN_RIGHT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.turnRight();
-            }
-        },
-        SPIN_LEFT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.spinLeft();
-            }
-        },
-
-        SPIN_RIGHT() {
-
-            @Override
-            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory) {
-                movPrim.spinRight();
-            }
-        };
-
-        public abstract void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory, LinkedList<Float> lineCenterHistory);
-
+        // searchLeftOfLine(configuration);
     }
 
-    private StraightCase evaluateStraightCase(Configuration config) {
-        StraightCase currentCase = null;
-        LineBorders lineBorders = config.getLines().get(config.getLines().size() - 1);
-        int rightBorder = lineBorders.getBrightToDark();
-        int leftBorder = lineBorders.getDarkToBright();
-        float lineCenter = (rightBorder + leftBorder) / 2;
+    private void searchRightOfLine(Configuration configuration) {
+        SensorDataCollector collector = configuration.getSensorDataCollector();
+        collector.turnToLeftMaximum();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
 
-        if (rightBorder == Integer.MIN_VALUE && leftBorder == Integer.MIN_VALUE) {
-            currentCase = StraightCase.LOST;
-        } else {
-        	lineCenter = Math.max(lineCenter,0);
-        	currentCase = StraightCase.ON_LINE;
+        leftWheel.rotate(-100 * lostNumber, true);
+        rightWheel.stop();
+
+        boolean found = false;
+        while (!configuration.isCancel()) {
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            if (collector.isBright(lightValue)) {
+                leftWheel.stop();
+                rightWheel.stop();
+                found = true;
+                break;
+            }
         }
-        config.write(currentCase.name());
-        if (caseHistory.size() > 30) {
-            caseHistory.remove(0);
+        if (found) {
+            return;
         }
-        caseHistory.add(currentCase);
-        lineCenterHistory.add(lineCenter);
-        return currentCase;
+        leftWheel.rotate(100 * lostNumber);
+        rightWheel.stop();
+        leftWheel.stop();
+        rightWheel.rotate(-100 * lostNumber, true);
+
+        while (!configuration.isCancel()) {
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            if (collector.isBright(lightValue)) {
+                leftWheel.stop();
+                rightWheel.stop();
+                found = true;
+                break;
+            }
+        }
+        rightWheel.rotate(100 * lostNumber);
+        rightWheel.stop();
+        leftWheel.stop();
+    }
+
+    private void stupidVersion(Configuration configuration) {
+        SensorDataCollector collector = configuration.getSensorDataCollector();
+        configuration.getSensorDataCollector().turnToCenter();
+        LightSensor light = configuration.getLight();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        leftWheel.setSpeed(SPEED);
+        rightWheel.setSpeed(SPEED);
+
+        leftWheel.forward();
+        rightWheel.forward();
+        while (!configuration.isCancel()) {
+            int value = light.getNormalizedLightValue();
+            if (collector.isBright(value)) {
+                leftWheel.setSpeed(SPEED);
+                rightWheel.setSpeed(SPEED / 2);
+                leftWheel.forward();
+                rightWheel.backward();
+            } else {
+                leftWheel.setSpeed(SPEED / 2);
+                rightWheel.setSpeed(SPEED);
+                leftWheel.backward();
+                rightWheel.forward();
+            }
+        }
     }
 }

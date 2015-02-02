@@ -46,7 +46,6 @@ public class Configuration {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final FollowLine followLine;
     private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
@@ -62,11 +61,10 @@ public class Configuration {
         leftWheel = Motor.B;
         rightWheel = Motor.A;
         sensorMotor = Motor.C;
-        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        followLine = new FollowLine(movementPrimitives);
+        currentStep = new FollowLine();
         followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
@@ -104,7 +102,7 @@ public class Configuration {
     }
 
     public void followLine() {
-        followLine.run(this);
+        currentStep.run(this);
     }
 
     public void followLeftWall() {
@@ -194,6 +192,7 @@ public class Configuration {
             RConsole.openUSB(0);
         }
     }
+
     public void addStep(Step step) {
         if (currentStep == null) {
             currentStep = step;
@@ -207,6 +206,7 @@ public class Configuration {
             return;
         }
         currentStep = steps.remove(0);
+        System.out.println("Next step");
     }
 
     public void runCurrentStep() {
