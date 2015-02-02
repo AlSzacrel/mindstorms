@@ -14,7 +14,9 @@ import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.RConsole;
 
 public class Configuration implements CancelUpdater {
 
@@ -32,6 +34,7 @@ public class Configuration implements CancelUpdater {
     public static final int MAX_ANGLE = 150;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final boolean DEBUG_MODE = false;
+    private static final boolean REMOTE_DEBUG = false;
     private static final int MAX_LINE_SIZE = 20;
 
     private final LightSensor light;
@@ -43,12 +46,16 @@ public class Configuration implements CancelUpdater {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final Step currentStep;
+    private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
+    private final TouchSensor rightTouchSensor;
+    private final ArrayList<Step> steps = new ArrayList<>();
+    private Step currentStep;
 
     public Configuration() throws IOException {
         super();
+        rightTouchSensor = new TouchSensor(SensorPort.S1);
         light = new LightSensor(SensorPort.S4);
         ultraSonic = new UltrasonicSensor(SensorPort.S2);
         leftWheel = Motor.B;
@@ -59,6 +66,7 @@ public class Configuration implements CancelUpdater {
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
         currentStep = new FollowLine(movementPrimitives);
+        followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -67,6 +75,11 @@ public class Configuration implements CancelUpdater {
         }
         file.createNewFile();
         sensorDataFile = new DataOutputStream(new FileOutputStream(file));
+    }
+
+    public TouchSensor getRightTouchSensor() {
+        return rightTouchSensor;
+
     }
 
     public LightSensor getLight() {
@@ -93,6 +106,10 @@ public class Configuration implements CancelUpdater {
         currentStep.run(this);
     }
 
+    public void followLeftWall() {
+        followLeftWall.run(this);
+    }
+
     @Override
     public boolean isCancel() {
         return cancel;
@@ -113,13 +130,13 @@ public class Configuration implements CancelUpdater {
 
     public void updateSensorData(DataSet dataset) {
         sensorData.add(dataset);
-        // if (DEBUG_MODE) {
-        // try {
-        // sensorDataFile.writeUTF(dataset.toString());
-        // } catch (IOException exception) {
-        // exception.printStackTrace();
-        // }
-        // }
+        if (DEBUG_MODE) {
+            try {
+                sensorDataFile.writeUTF(dataset.toString());
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
     public NXTRegulatedMotor getLeftWheel() {
@@ -170,6 +187,34 @@ public class Configuration implements CancelUpdater {
 
     public List<LineBorders> getLines() {
         return lines;
+    }
+
+    public void startConsole() {
+        if (REMOTE_DEBUG) {
+            RConsole.openUSB(0);
+        }
+    }
+
+    public void addStep(Step step) {
+        if (currentStep == null) {
+            currentStep = step;
+            return;
+        }
+        steps.add(step);
+    }
+
+    public void nextStep() {
+        if (steps.isEmpty()) {
+            return;
+        }
+        currentStep = steps.remove(0);
+    }
+
+    public void runCurrentStep() {
+        if (currentStep == null) {
+            return;
+        }
+        currentStep.run(this);
     }
 
 }

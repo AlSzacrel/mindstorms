@@ -12,16 +12,25 @@ public class Marvin {
     }
 
     public void drive() throws IOException {
-        // RConsole.openUSB(0);
+        configuration.startConsole();
         // RConsole.println("collect data");
         // RConsole.println(configuration.getLines().toString());
+        configuration.getMovementPrimitives().slow();
         while (running) {
             cancelRun();
             configuration.displayInformation();
-            configuration.getSensorDataCollector().collectData();
+            // configuration.getMovementPrimitives().crawl();
+            // configuration.getMovementPrimitives().drive();
+            configuration.runCurrentStep();
+
+            // DataSet dataRow =
+            // configuration.getSensorDataCollector().collectDataRow();
+            // RConsole.println(dataRow.toString());
+            // configuration.getSensorDataCollector().collectData();
             // configuration.getMovementPrimitives().slow();
             // configuration.getMovementPrimitives().drive();
-            configuration.followLine();
+            // configuration.followLine();
+            // configuration.followLeftWall();
             // Delay.msDelay(500);
             // configuration.getMovementPrimitives().stop();
         }

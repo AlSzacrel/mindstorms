@@ -1,45 +1,83 @@
 package marvin;
 
+import java.util.LinkedList;
+
+import lejos.nxt.comm.RConsole;
+import lejos.util.Delay;
+
 public class FollowLine implements Step {
 
     private final MovementPrimitives movPrim;
+    private final LinkedList<StraightCase> caseHistory;
 
     public FollowLine(MovementPrimitives movPrim) {
         this.movPrim = movPrim;
+        this.caseHistory = new LinkedList<StraightCase>();
     }
 
     @Override
     public void run(Configuration configuration) {
-        evaluateStraightCase(configuration).adjustCourse(movPrim);
+        configuration.getSensorDataCollector().collectData();
+        evaluateStraightCase(configuration).adjustCourse(movPrim, caseHistory);
     }
 
     private enum StraightCase {
         LOST() {
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
-                movPrim.backup();
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
+                RConsole.println(caseHistory.toString());
+                int historySize = caseHistory.size();
+                RConsole.println("Set slow");
+                movPrim.fullSpeed();
+                if (historySize > 1 && caseHistory.get(historySize - 2) != LOST) {
+                    RConsole.println("case 1");
+                    movPrim.spinLeft();
+                    Delay.msDelay(200);
+                } else if (historySize > 2 && caseHistory.get(historySize - 3) != LOST) {
+                    RConsole.println("case 2");
+                    movPrim.spinRight();
+                    Delay.msDelay(200);
+                } else if (historySize > 3 && caseHistory.get(historySize - 4) != LOST) {
+                    RConsole.println("case 3");
+                    movPrim.spinRight();
+                    Delay.msDelay(200);
+                } else if (historySize > 4 && caseHistory.get(historySize - 5) != LOST) {
+                    RConsole.println("case 4");
+                    movPrim.spinLeft();
+                    Delay.msDelay(200);
+                } else {
+                    movPrim.slow();
+                    RConsole.println("else case");
+                    movPrim.backup();
+                }
+                RConsole.println("before delay");
+                Delay.msDelay(200);
+                RConsole.println("stop");
+                movPrim.stop();
+                movPrim.slow();
             }
         },
 
         STRAIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.slow();
+                movPrim.drive();
             }
         },
 
         ORTHOGONAL() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.correctionLeft(); // TODO handle better
             }
         },
         CORRECTION_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.correctionLeft();
             }
         },
@@ -47,14 +85,14 @@ public class FollowLine implements Step {
         CORRECTION_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.correctionRight();
             }
         },
         TURN_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.turnLeft();
             }
         },
@@ -62,14 +100,14 @@ public class FollowLine implements Step {
         TURN_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.turnRight();
             }
         },
         SPIN_LEFT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.spinLeft();
             }
         },
@@ -77,12 +115,12 @@ public class FollowLine implements Step {
         SPIN_RIGHT() {
 
             @Override
-            public void adjustCourse(MovementPrimitives movPrim) {
+            public void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory) {
                 movPrim.spinRight();
             }
         };
 
-        public abstract void adjustCourse(MovementPrimitives movPrim);
+        public abstract void adjustCourse(MovementPrimitives movPrim, LinkedList<StraightCase> caseHistory);
 
     }
 
@@ -128,6 +166,10 @@ public class FollowLine implements Step {
             currentCase = StraightCase.LOST;
         }
         config.write(currentCase.name());
+        if (caseHistory.size() > 30) {
+            caseHistory.remove(0);
+        }
+        caseHistory.add(currentCase);
         return currentCase;
     }
 }

@@ -36,4 +36,8 @@ public class DataSet {
         return values.get(index);
     }
 
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
 }

@@ -3,9 +3,9 @@ package marvin;
 public class MovementPrimitives {
     private static final float CORRECTION_FACTOR = 0.75f;
     private static final float TURN_FACTOR = 0.5f;
-    private static final float SPIN_FACTOR = 0.25f;
+    private static final float SPIN_FACTOR = 1f;
     private static final float SPEED_FACTOR_FULL = 0.5f;
-    private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 4f;
+    private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
     private float speed = 0;
@@ -78,14 +78,25 @@ public class MovementPrimitives {
     public void spinLeft() {
         conf.getLeftWheel().setSpeed(SPIN_FACTOR * speed);
         conf.getRightWheel().setSpeed(SPIN_FACTOR * speed);
-        conf.getLeftWheel().backward();
-        conf.getRightWheel().forward();
+        conf.getLeftWheel().rotate(-90, true);
+        conf.getRightWheel().rotate(90, true);
+        conf.getLeftWheel().waitComplete();
+        conf.getRightWheel().waitComplete();
     }
 
     public void spinRight() {
         conf.getLeftWheel().setSpeed(SPIN_FACTOR * speed);
         conf.getRightWheel().setSpeed(SPIN_FACTOR * speed);
+        conf.getLeftWheel().rotate(90, true);
+        conf.getRightWheel().rotate(-90, true);
+        conf.getLeftWheel().waitComplete();
+        conf.getRightWheel().waitComplete();
+    }
+
+    public void correct(int correctionFactor) {
+        conf.getLeftWheel().setSpeed(speed - correctionFactor);
+        conf.getRightWheel().setSpeed(speed + correctionFactor);
         conf.getLeftWheel().forward();
-        conf.getRightWheel().backward();
+        conf.getRightWheel().forward();
     }
 }
