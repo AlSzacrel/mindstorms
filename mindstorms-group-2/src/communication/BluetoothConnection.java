@@ -29,6 +29,21 @@ public class BluetoothConnection implements AutoCloseable {
      * @param value
      *            integer to send
      */
+    protected void writeBoolean(boolean value) {
+        try {
+            dos.writeBoolean(value);
+            dos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * method for sending an integer to the lift
+     *
+     * @param value
+     *            integer to send
+     */
     protected void writeInt(int value) {
         try {
             dos.writeInt(value);
@@ -43,7 +58,7 @@ public class BluetoothConnection implements AutoCloseable {
      *
      * @return answer of the lift
      */
-    protected boolean readBool() {
+    protected boolean readBoolean() {
         boolean value = false;
         try {
             value = dis.readBoolean();
@@ -67,7 +82,8 @@ public class BluetoothConnection implements AutoCloseable {
     /**
      * this method's name should be self explaining
      */
-    public void closeConnection() {
+    @Override
+    public void close() {
         if (connection != null) {
             try {
                 writeInt(CLOSE_CONNECTION);
@@ -79,11 +95,6 @@ public class BluetoothConnection implements AutoCloseable {
             }
         }
         LCD.drawString("Disconnected", 0, 0);
-    }
-
-    @Override
-    public void close() {
-        closeConnection();
     }
 
 }

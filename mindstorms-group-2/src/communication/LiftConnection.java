@@ -19,7 +19,7 @@ public class LiftConnection extends BluetoothConnection {
      */
     public boolean goDown() {
         writeInt(GO_DOWN);
-        return readBool();
+        return readBoolean();
     }
 
     /**
@@ -29,7 +29,7 @@ public class LiftConnection extends BluetoothConnection {
      */
     public boolean canExit() {
         writeInt(IS_DOWN);
-        return readBool();
+        return readBoolean();
     }
 
     @Override

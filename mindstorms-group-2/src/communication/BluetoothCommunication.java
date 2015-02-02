@@ -19,6 +19,7 @@ public class BluetoothCommunication {
 
     private static final String LIFT = "Lift";
     private static final String TURN_TABLE = "TurnTable";
+    private static final String GATE = "TestName";
 
     private static BTConnection connection;
 
@@ -46,7 +47,7 @@ public class BluetoothCommunication {
         }
         LCD.drawString("Can exit: Yes", 0, 2);
 
-        lift.closeConnection();
+        lift.close();
     }
 
     public static LiftConnection connectToLift(CancelUpdater configuration) {
@@ -63,6 +64,14 @@ public class BluetoothCommunication {
         }
 
         return new TurnTableConnection(connection);
+    }
+
+    public static GateConnection connectToGate(CancelUpdater configuration) {
+        while (!openConnection(GATE) && !configuration.isCancel()) {
+            Delay.msDelay(1000); // waiting for free connection
+        }
+
+        return new GateConnection(connection);
     }
 
     /**
