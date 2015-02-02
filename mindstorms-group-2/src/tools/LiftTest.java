@@ -14,7 +14,7 @@ import communication.LiftConnection;
  * @author The Coding-Team
  *
  */
-public class BluetoothTest {
+public class LiftTest {
 
     /**
      * just a main function...

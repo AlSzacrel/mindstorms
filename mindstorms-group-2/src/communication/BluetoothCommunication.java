@@ -2,8 +2,6 @@ package communication;
 
 import javax.bluetooth.RemoteDevice;
 
-import lejos.nxt.Button;
-import lejos.nxt.LCD;
 import lejos.nxt.comm.BTConnection;
 import lejos.nxt.comm.Bluetooth;
 import lejos.util.Delay;
@@ -22,33 +20,6 @@ public class BluetoothCommunication {
     private static final String GATE = "TestName";
 
     private static BTConnection connection;
-
-    /**
-     * just a main function...
-     *
-     * @param args
-     *            you know what this is for (at least i hope so)
-     */
-    public static void main(String args[]) {
-        LiftConnection lift = connectToLift(new CancelUpdater() {
-
-            @Override
-            public boolean isCancel() {
-                return Button.ESCAPE.isDown();
-            }
-        });
-        lift.goDown();
-
-        LCD.drawString("Going down", 0, 1);
-
-        while (!lift.canExit()) {
-            LCD.drawString("Can exit: No", 0, 2);
-            Delay.msDelay(100);
-        }
-        LCD.drawString("Can exit: Yes", 0, 2);
-
-        lift.close();
-    }
 
     public static LiftConnection connectToLift(CancelUpdater configuration) {
         while (!openConnection(LIFT) && !configuration.isCancel()) {
