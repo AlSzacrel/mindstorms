@@ -208,6 +208,7 @@ public class Configuration implements CancelUpdater {
             return;
         }
         currentStep = steps.remove(0);
+        System.out.println("Next step");
     }
 
     public void runCurrentStep() {
