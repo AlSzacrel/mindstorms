@@ -15,7 +15,7 @@ public class Marvin {
         // RConsole.openUSB(0);
         // RConsole.println("collect data");
         // RConsole.println(configuration.getLines().toString());
-        configuration.getMovementPrimitives().crawl();
+        configuration.getMovementPrimitives().slow();
         while (running) {
             cancelRun();
             configuration.displayInformation();

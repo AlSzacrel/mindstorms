@@ -46,6 +46,11 @@ public class FollowWall implements Step {
             Sound.beep();
             Sound.beep();
             configuration.nextStep();
+            sensorDataCollector.turnToCenter();
+            while (sensorDataCollector.isDark(light.getNormalizedLightValue()) && !configuration.isCancel()) {
+                movement.drive();
+            }
+            sensorDataCollector.turnToLeftMaximum();
         }
     }
 
@@ -77,9 +82,9 @@ public class FollowWall implements Step {
         }
         movement.stop();
         movement.backup();
-        Delay.msDelay(2000);
+        Delay.msDelay(4000);
         movement.spinLeft();
-        Delay.msDelay(600);
+        Delay.msDelay(1200);
         movement.stop();
         movement.drive();
     }

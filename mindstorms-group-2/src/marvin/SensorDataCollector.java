@@ -20,40 +20,52 @@ public class SensorDataCollector {
 
     public void collectData() {
         NXTRegulatedMotor sensorMotor = configuration.getSensorMotor();
-        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
-        sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
-        int distance = configuration.getUltraSonic().getDistance();
-        DataSet dataSet = new DataSet(1);
-        dataSet.append(new Value(0, 0, distance));
-        configuration.updateSensorData(dataSet);
-        Delay.msDelay(100);
+        sensorMotor.setSpeed(SENSOR_HEAD_SPEED_FACTOR * sensorMotor.getMaxSpeed());
+        configuration.addNewLine(scan(sensorMotor));
+        leftToRight = !leftToRight;
+    }
+
+    private LineBorders scan(NXTRegulatedMotor sensorMotor) {
+        if (leftToRight) {
+            sensorMotor.rotateTo(Configuration.MAX_ANGLE, true);
+        } else {
+            sensorMotor.rotateTo(0, true);
+        }
         int lastLightValue = configuration.getLight().getNormalizedLightValue();
         int lastAngle = sensorMotor.getTachoCount();
         int darkToBrightAngle = Integer.MIN_VALUE;
         int brightToDarkAngle = Integer.MIN_VALUE;
+        int minAngle = lastAngle;
+        int maxAngle = lastAngle;
 
         while (sensorMotor.isMoving() && !configuration.isCancel()) {
+            Delay.msDelay(MEASURE_INTERVAL);
             int lightValue = configuration.getLight().getNormalizedLightValue();
             Integer angle = sensorMotor.getTachoCount();
-            configuration.write(angle + " - " + lightValue + ";");
-
             if (isDark(lastLightValue) && isBright(lightValue)) {
-                darkToBrightAngle = (angle + lastAngle) / 2;
-                brightToDarkAngle = Integer.MIN_VALUE;
+                if (leftToRight) {
+                    darkToBrightAngle = (angle + lastAngle) / 2;
+                    brightToDarkAngle = Integer.MIN_VALUE;
+                } else {
+                    brightToDarkAngle = (angle + lastAngle) / 2;
+                    darkToBrightAngle = Integer.MIN_VALUE;
+                }
             }
             if (isBright(lastLightValue) && isDark(lightValue)) {
-                brightToDarkAngle = (angle + lastAngle) / 2;
+                if (leftToRight) {
+                    brightToDarkAngle = (angle + lastAngle) / 2;
+                } else {
+                    darkToBrightAngle = (angle + lastAngle) / 2;
+                }
             }
             lastLightValue = lightValue;
             lastAngle = angle;
-            Delay.msDelay(100);
+            minAngle = Math.min(minAngle, angle);
+            maxAngle = Math.max(maxAngle, angle);
         }
         configuration.write("darkToBright: " + darkToBrightAngle + " brightToDark: " + brightToDarkAngle
                 + " lineWidth: " + (brightToDarkAngle - darkToBrightAngle) + ";\r\n\r\n");
-        sensorMotor.rotateTo(0, true);
-        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
-        sensorMotor.waitComplete();
-        configuration.addNewLine(new LineBorders(darkToBrightAngle, brightToDarkAngle));
+        return new LineBorders(darkToBrightAngle, brightToDarkAngle, minAngle, maxAngle);
     }
 
     public boolean isBright(int lightValue) {
@@ -97,5 +109,9 @@ public class SensorDataCollector {
     public void turnToLeftMaximum() {
         configuration.getSensorMotor().rotateTo(0);
         leftToRight = true;
+    }
+
+    public void turnToCenter() {
+        configuration.getSensorMotor().rotateTo(Configuration.MAX_ANGLE / 2);
     }
 }
