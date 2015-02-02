@@ -33,7 +33,9 @@ public class GateTest {
 
             gate.passed();
             System.out.println("Sended passing signal");
-            gate.waitForSuccess();
+            while (!gate.waitForSuccess()) {
+                Delay.msDelay(50);
+            }
             System.out.println("Successful passed");
         }
         Button.waitForAnyPress();
