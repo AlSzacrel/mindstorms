@@ -13,6 +13,7 @@ public class FollowLine implements Step {
     private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
     private static final int LOW_THRESHOLD = 5;
     private int lostNumber = 0;
+    private boolean foundLeft = false;
 
     @Override
     public void run(Configuration configuration) {
@@ -38,12 +39,48 @@ public class FollowLine implements Step {
         movement.correct(gainedFactor);
     }
 
-    private void resetLost() {
+    private void resetLost(boolean foundLeft) {
         lostNumber = 0;
+        this.foundLeft = foundLeft;
     }
 
     private void lost(Configuration configuration) {
         lostNumber++;
+        if (foundLeft) {
+            searchLeft(configuration);
+            searchRight(configuration);
+        } else {
+            searchRight(configuration);
+            searchLeft(configuration);
+        }
+    }
+
+    private void searchRight(Configuration configuration) {
+        SensorDataCollector collector = configuration.getSensorDataCollector();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+
+        // TODO we should search for line while switching head from left to
+        // right
+        collector.turnToRightMaximum();
+        rightWheel.rotate(-LOST_ANGLE * lostNumber, true);
+
+        while (rightWheel.isMoving() && !configuration.isCancel()) {
+            int lightValue = configuration.getLight().getNormalizedLightValue();
+            if (collector.isBright(lightValue)) {
+                leftWheel.stop();
+                rightWheel.stop();
+                rightWheel.rotate(-FOUND_ANGLE);
+                resetLost(false);
+                return;
+            }
+        }
+        rightWheel.rotate(LOST_ANGLE * lostNumber);
+        rightWheel.stop();
+        leftWheel.stop();
+    }
+
+    private void searchLeft(Configuration configuration) {
         SensorDataCollector collector = configuration.getSensorDataCollector();
         NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
         NXTRegulatedMotor rightWheel = configuration.getRightWheel();
@@ -59,30 +96,11 @@ public class FollowLine implements Step {
                 leftWheel.stop();
                 rightWheel.stop();
                 leftWheel.rotate(-FOUND_ANGLE);
-                resetLost();
+                resetLost(false);
                 return;
             }
         }
         leftWheel.rotate(LOST_ANGLE * lostNumber);
-        rightWheel.stop();
-        leftWheel.stop();
-
-        // TODO we should search for line while switching head from left to
-        // right
-        collector.turnToRightMaximum();
-        rightWheel.rotate(-LOST_ANGLE * lostNumber, true);
-
-        while (rightWheel.isMoving() && !configuration.isCancel()) {
-            int lightValue = configuration.getLight().getNormalizedLightValue();
-            if (collector.isBright(lightValue)) {
-                leftWheel.stop();
-                rightWheel.stop();
-                rightWheel.rotate(-FOUND_ANGLE);
-                resetLost();
-                return;
-            }
-        }
-        rightWheel.rotate(LOST_ANGLE * lostNumber);
         rightWheel.stop();
         leftWheel.stop();
     }
