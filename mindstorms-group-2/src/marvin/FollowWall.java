@@ -15,7 +15,7 @@ public class FollowWall implements Step {
      */
 
     // first labyrinth works with 30
-    private static final int SIDE_WALL_THRESHOLD = 27;
+    private static final int SIDE_WALL_THRESHOLD = 25;
     private static final int SEARCH_THRESHOLD = 50;
     private static final int GAIN = 15;
     private static final int MAX_CORRECTION = 100;

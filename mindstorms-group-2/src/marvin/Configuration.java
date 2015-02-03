@@ -18,7 +18,7 @@ import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
 
-public class Configuration {
+public class Configuration implements CancelUpdater {
 
     private final class CancelListener implements ButtonListener {
         @Override
@@ -46,7 +46,6 @@ public class Configuration {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
     private final TouchSensor rightTouchSensor;
@@ -64,8 +63,6 @@ public class Configuration {
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        currentStep = new FollowLine();
-        followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -101,15 +98,8 @@ public class Configuration {
         return movementPrimitives;
     }
 
-    public void followLine() {
-        currentStep.run(this);
-    }
-
-    public void followLeftWall() {
-        followLeftWall.run(this);
-    }
-
-    public boolean isCancel() {
+    @Override
+	public boolean isCancel() {
         return cancel;
     }
 
