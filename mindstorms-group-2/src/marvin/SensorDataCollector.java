@@ -2,6 +2,7 @@ package marvin;
 
 import lejos.nxt.LightSensor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
 import lejos.util.Delay;
 
@@ -15,9 +16,17 @@ public class SensorDataCollector {
     private final Configuration configuration;
 
     private boolean leftToRight = true;
-
+	int lastLightValue;
+	int lineBeginning = 0;
+	int lineEnding = 0;
+	
     public SensorDataCollector(Configuration configuration) {
         this.configuration = configuration;
+    }
+    
+    public void resetBarcode() {
+    	lineBeginning = 0;
+    	lineEnding = 0;
     }
 
     public void collectData() {
@@ -163,4 +172,26 @@ public class SensorDataCollector {
         leftToRight = !leftToRight;
         return new LineBorders(darkToBright, brightToDark, 0, lastLightValue);
     }
+
+	boolean detectBarcode(LightSensor light) {
+	    int lightValue = light.getNormalizedLightValue();
+	    // TODO detect line borders and count them. There must be 3 from dark to
+	    // bright and 3 from bright to dark
+	    if (isDark(lastLightValue) && isBright(lightValue)) {
+	        // switched from dark to bright --> line starts
+	        lineBeginning++;
+	        Sound.beep();
+	        Sound.beep();
+	    }
+	    if (isBright(lastLightValue) && isDark(lightValue)) {
+	        // switched from dark to bright --> line ends
+	        lineEnding++;
+	        Sound.beep();
+	        Sound.beep();
+	        Sound.beep();
+	    }
+	    // TODO use similar mechanism as in FollowLine
+	    lastLightValue = lightValue;
+	    return lineBeginning >= 3 && lineEnding >= 3;
+	}
 }

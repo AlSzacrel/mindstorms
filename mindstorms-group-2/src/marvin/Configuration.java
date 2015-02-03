@@ -193,9 +193,10 @@ public class Configuration implements CancelUpdater {
 
     public void nextStep() {
         if (steps.isEmpty()) {
-            return;
+        	return;
         }
         currentStep = steps.remove(0);
+        sensorDataCollector.resetBarcode();
         System.out.println("Next step");
     }
 

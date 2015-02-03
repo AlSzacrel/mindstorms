@@ -104,4 +104,9 @@ public class MovementPrimitives {
         conf.getLeftWheel().setSpeed(speed);
         conf.getRightWheel().setSpeed(speed);
     }
+
+	public void searchBarcode() {
+		// TODO Auto-generated method stub
+		
+	}
 }
