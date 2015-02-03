@@ -6,6 +6,8 @@ import lejos.nxt.comm.RConsole;
 
 public class FollowLine implements Step {
 
+    private static final int FOUND_ANGLE = 30;
+    private static final int LOST_ANGLE = 50;
     private static final int SPEED = 150;
     private static final float GAIN = 0.5f;
     private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
@@ -26,7 +28,6 @@ public class FollowLine implements Step {
             lost(configuration);
             return;
         }
-        lostNumber = 0;
 
         int center = (leftBorder + rightBorder) / 2;
 
@@ -35,55 +36,53 @@ public class FollowLine implements Step {
 
         RConsole.println("" + gainedFactor);
         movement.correct(gainedFactor);
+    }
 
-        // evaluateStraightCase(configuration).adjustCourse(movPrim,
-        // caseHistory, lineCenterHistory);
+    private void resetLost() {
+        lostNumber = 0;
     }
 
     private void lost(Configuration configuration) {
         lostNumber++;
-        searchRightOfLine(configuration);
-
-        // searchLeftOfLine(configuration);
-    }
-
-    private void searchRightOfLine(Configuration configuration) {
         SensorDataCollector collector = configuration.getSensorDataCollector();
-        collector.turnToLeftMaximum();
         NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
         NXTRegulatedMotor rightWheel = configuration.getRightWheel();
 
-        leftWheel.rotate(-100 * lostNumber, true);
+        leftWheel.stop();
         rightWheel.stop();
+        collector.turnToLeftMaximum();
+        leftWheel.rotate(-LOST_ANGLE * lostNumber, true);
 
-        boolean found = false;
-        while (!configuration.isCancel()) {
+        while (leftWheel.isMoving() && !configuration.isCancel()) {
             int lightValue = configuration.getLight().getNormalizedLightValue();
             if (collector.isBright(lightValue)) {
                 leftWheel.stop();
                 rightWheel.stop();
-                found = true;
-                break;
+                leftWheel.rotate(-FOUND_ANGLE);
+                resetLost();
+                return;
             }
         }
-        if (found) {
-            return;
-        }
-        leftWheel.rotate(100 * lostNumber);
+        leftWheel.rotate(LOST_ANGLE * lostNumber);
         rightWheel.stop();
         leftWheel.stop();
-        rightWheel.rotate(-100 * lostNumber, true);
 
-        while (!configuration.isCancel()) {
+        // TODO we should search for line while switching head from left to
+        // right
+        collector.turnToRightMaximum();
+        rightWheel.rotate(-LOST_ANGLE * lostNumber, true);
+
+        while (rightWheel.isMoving() && !configuration.isCancel()) {
             int lightValue = configuration.getLight().getNormalizedLightValue();
             if (collector.isBright(lightValue)) {
                 leftWheel.stop();
                 rightWheel.stop();
-                found = true;
-                break;
+                rightWheel.rotate(-FOUND_ANGLE);
+                resetLost();
+                return;
             }
         }
-        rightWheel.rotate(100 * lostNumber);
+        rightWheel.rotate(LOST_ANGLE * lostNumber);
         rightWheel.stop();
         leftWheel.stop();
     }
