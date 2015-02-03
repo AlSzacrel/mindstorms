@@ -1,6 +1,5 @@
 package marvin;
 
-import lejos.nxt.LightSensor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.comm.RConsole;
 
@@ -46,6 +45,8 @@ public class FollowLine implements Step {
 
     private void lost(Configuration configuration) {
         lostNumber++;
+        configuration.getMovementPrimitives().stop();
+        configuration.getMovementPrimitives().resetSpeed();
         if (foundLeft) {
             searchLeft(configuration);
             searchRight(configuration);
@@ -62,6 +63,8 @@ public class FollowLine implements Step {
 
         // TODO we should search for line while switching head from left to
         // right
+        leftWheel.stop();
+        rightWheel.stop();
         collector.turnToRightMaximum();
         rightWheel.rotate(-LOST_ANGLE * lostNumber, true);
 
@@ -96,39 +99,12 @@ public class FollowLine implements Step {
                 leftWheel.stop();
                 rightWheel.stop();
                 leftWheel.rotate(-FOUND_ANGLE);
-                resetLost(false);
+                resetLost(true);
                 return;
             }
         }
         leftWheel.rotate(LOST_ANGLE * lostNumber);
         rightWheel.stop();
         leftWheel.stop();
-    }
-
-    private void stupidVersion(Configuration configuration) {
-        SensorDataCollector collector = configuration.getSensorDataCollector();
-        configuration.getSensorDataCollector().turnToCenter();
-        LightSensor light = configuration.getLight();
-        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
-        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
-        leftWheel.setSpeed(SPEED);
-        rightWheel.setSpeed(SPEED);
-
-        leftWheel.forward();
-        rightWheel.forward();
-        while (!configuration.isCancel()) {
-            int value = light.getNormalizedLightValue();
-            if (collector.isBright(value)) {
-                leftWheel.setSpeed(SPEED);
-                rightWheel.setSpeed(SPEED / 2);
-                leftWheel.forward();
-                rightWheel.backward();
-            } else {
-                leftWheel.setSpeed(SPEED / 2);
-                rightWheel.setSpeed(SPEED);
-                leftWheel.backward();
-                rightWheel.forward();
-            }
-        }
     }
 }

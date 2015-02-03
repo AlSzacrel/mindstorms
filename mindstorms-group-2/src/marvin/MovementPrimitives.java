@@ -99,4 +99,9 @@ public class MovementPrimitives {
         conf.getLeftWheel().forward();
         conf.getRightWheel().forward();
     }
+
+    public void resetSpeed() {
+        conf.getLeftWheel().setSpeed(speed);
+        conf.getRightWheel().setSpeed(speed);
+    }
 }
