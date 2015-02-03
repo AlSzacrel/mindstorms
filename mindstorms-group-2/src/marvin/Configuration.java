@@ -46,7 +46,6 @@ public class Configuration implements CancelUpdater {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
     private final TouchSensor rightTouchSensor;
@@ -65,8 +64,6 @@ public class Configuration implements CancelUpdater {
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        currentStep = new FollowLine(movementPrimitives);
-        followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -100,14 +97,6 @@ public class Configuration implements CancelUpdater {
 
     public MovementPrimitives getMovementPrimitives() {
         return movementPrimitives;
-    }
-
-    public void followLine() {
-        currentStep.run(this);
-    }
-
-    public void followLeftWall() {
-        followLeftWall.run(this);
     }
 
     @Override
