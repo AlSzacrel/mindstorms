@@ -9,6 +9,11 @@ public class ReelBoard implements Step {
 
     @Override
     public void run(Configuration configuration) {
+        configuration.getMovementPrimitives().stop();
+        configuration.getLeftWheel().rotate(-200, true);
+        configuration.getRightWheel().rotate(-200, true);
+        configuration.getLeftWheel().waitComplete();
+        configuration.getRightWheel().waitComplete();
         try (GateConnection gate = BluetoothCommunication.connectToGate(configuration)) {
             configuration.getMovementPrimitives().fullSpeed();
             configuration.getMovementPrimitives().drive();
