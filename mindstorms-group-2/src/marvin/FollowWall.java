@@ -16,14 +16,14 @@ public class FollowWall implements Step {
      */
 
     // first labyrinth works with 30
-    private static final int SIDE_WALL_THRESHOLD = 9;
-    private static final int SEARCH_THRESHOLD = 50;
-    private static final int GAIN = 10;
+    private static final int SIDE_WALL_THRESHOLD = 11;
+    private static final int GAIN = 5;
     private static final int MAX_CORRECTION = 45;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
 
     @Override
     public void run(Configuration configuration) {
+        configuration.getMovementPrimitives().slow();
         // TODO initially search wall
         // search on the left and right side. If there is no wall, we are in the
         // middle
@@ -75,9 +75,6 @@ public class FollowWall implements Step {
 
     public void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
         int distance = ultraSonic.getDistance();
-        if (distance > SEARCH_THRESHOLD) {
-            searchWall(movement);
-        }
         int correctionFactor = SIDE_WALL_THRESHOLD - distance;
         int gainedCorrection = correctionFactor * GAIN;
         int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
@@ -87,8 +84,8 @@ public class FollowWall implements Step {
         movement.correct(limittedCorrection);
     }
 
-    // TODO do we really need this method
-    private void searchWall(MovementPrimitives movement) {
-        movement.backup();
+    @Override
+    public String getName() {
+        return "FollowWall";
     }
 }

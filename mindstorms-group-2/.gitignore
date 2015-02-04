@@ -2,3 +2,5 @@
 *.nxd
 *.nxj
 /.classpath
+
+/data/DistanceData/*.txt~
