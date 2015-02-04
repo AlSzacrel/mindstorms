@@ -50,7 +50,9 @@ public class TurnTableConnection extends BluetoothConnection {
 
     @Override
     public void close() {
+        System.out.println("Send cya");
         cya();
+        System.out.println("Close connection");
         super.close();
     }
 }

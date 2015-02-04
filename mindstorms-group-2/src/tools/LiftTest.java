@@ -14,7 +14,7 @@ import communication.LiftConnection;
  * @author The Coding-Team
  *
  */
-public class BluetoothTest {
+public class LiftTest {
 
     /**
      * just a main function...
@@ -24,24 +24,26 @@ public class BluetoothTest {
      */
     public static void main(String args[]) {
         LCD.drawString("Started", 0, 0);
-        LiftConnection lift = BluetoothCommunication.connectToLift(new CancelUpdater() {
+        try (LiftConnection lift = BluetoothCommunication.connectToLift(new CancelUpdater() {
 
             @Override
             public boolean isCancel() {
                 return Button.ESCAPE.isDown();
             }
-        });
-        lift.goDown();
+        })) {
+            while (!lift.canDriveIn()) {
+                Delay.msDelay(100);
+            }
+            lift.goDown();
 
-        LCD.drawString("Going down", 0, 1);
+            LCD.drawString("Going down", 0, 1);
 
-        while (!lift.canExit()) {
-            LCD.drawString("Can exit: No", 0, 2);
-            Delay.msDelay(100);
+            while (!lift.canExit()) {
+                LCD.drawString("Can exit: No", 0, 2);
+                Delay.msDelay(100);
 
+            }
+            LCD.drawString("Can exit: Yes", 0, 2);
         }
-        LCD.drawString("Can exit: Yes", 0, 2);
-
-        lift.closeConnection();
     }
 }
