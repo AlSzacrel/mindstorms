@@ -73,7 +73,7 @@ public class FollowWall implements Step {
         movement.drive();
     }
 
-    private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+    public void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
         int distance = ultraSonic.getDistance();
         if (distance > SEARCH_THRESHOLD) {
             searchWall(movement);
