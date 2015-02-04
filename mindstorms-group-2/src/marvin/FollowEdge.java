@@ -6,7 +6,7 @@ import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 35;
+	private final static int SIDE_EDGE_THRESHOLD = 30;
 	private final static int LEFT_CORRECTION_FACTOR = 15;
 	private final static int RIGHT_CORRECTION_FACTOR = -10;
 	private final static int DISTANCE_ERROR = 255;
