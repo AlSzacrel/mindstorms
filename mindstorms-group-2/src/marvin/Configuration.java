@@ -32,6 +32,7 @@ public class Configuration implements CancelUpdater {
     }
 
     public static final int MAX_ANGLE = 150;
+    public static final int EDGE_DETECTION_ANGLE = 50;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final boolean DEBUG_MODE = false;
     private static final boolean REMOTE_DEBUG = false;
@@ -46,27 +47,25 @@ public class Configuration implements CancelUpdater {
     private final UltrasonicSensor ultraSonic;
     private final MovementPrimitives movementPrimitives;
     private final SensorDataCollector sensorDataCollector;
-    private final FollowWall followLeftWall;
     private boolean cancel = false;
     private final ArrayList<LineBorders> lines;
     private final TouchSensor rightTouchSensor;
     private final ArrayList<Step> steps = new ArrayList<>();
     private Step currentStep;
+    private final TouchSensor leftTouchSensor;
 
     public Configuration() throws IOException {
         super();
         rightTouchSensor = new TouchSensor(SensorPort.S1);
+        leftTouchSensor = new TouchSensor(SensorPort.S3);
         light = new LightSensor(SensorPort.S4);
         ultraSonic = new UltrasonicSensor(SensorPort.S2);
         leftWheel = Motor.B;
         rightWheel = Motor.A;
         sensorMotor = Motor.C;
-        sensorMotor.setSpeed(0.1f * sensorMotor.getMaxSpeed());
         lines = new ArrayList<>();
         sensorData = new ArrayList<>();
         movementPrimitives = new MovementPrimitives(this);
-        currentStep = new FollowLine(movementPrimitives);
-        followLeftWall = new FollowWall();
         sensorDataCollector = new SensorDataCollector(this);
         Button.ESCAPE.addButtonListener(new CancelListener());
         File file = new File(SENSOR_DATA_FILE_NAME);
@@ -79,7 +78,10 @@ public class Configuration implements CancelUpdater {
 
     public TouchSensor getRightTouchSensor() {
         return rightTouchSensor;
+    }
 
+    public TouchSensor getLeftTouchSensor() {
+        return leftTouchSensor;
     }
 
     public LightSensor getLight() {
@@ -100,14 +102,6 @@ public class Configuration implements CancelUpdater {
 
     public MovementPrimitives getMovementPrimitives() {
         return movementPrimitives;
-    }
-
-    public void followLine() {
-        currentStep.run(this);
-    }
-
-    public void followLeftWall() {
-        followLeftWall.run(this);
     }
 
     @Override
@@ -205,9 +199,10 @@ public class Configuration implements CancelUpdater {
 
     public void nextStep() {
         if (steps.isEmpty()) {
-            return;
+        	return;
         }
         currentStep = steps.remove(0);
+        sensorDataCollector.resetBarcode();
         System.out.println("Next step");
     }
 

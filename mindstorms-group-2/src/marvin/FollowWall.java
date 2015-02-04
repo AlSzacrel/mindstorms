@@ -1,10 +1,11 @@
 package marvin;
 
 import lejos.nxt.LightSensor;
+import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.Sound;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
-import lejos.util.Delay;
+import lejos.nxt.comm.RConsole;
 
 public class FollowWall implements Step {
 
@@ -15,14 +16,11 @@ public class FollowWall implements Step {
      */
 
     // first labyrinth works with 30
-    private static final int SIDE_WALL_THRESHOLD = 27;
+    private static final int SIDE_WALL_THRESHOLD = 9;
     private static final int SEARCH_THRESHOLD = 50;
-    private static final int GAIN = 15;
-    private static final int MAX_CORRECTION = 100;
+    private static final int GAIN = 10;
+    private static final int MAX_CORRECTION = 45;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
-    private int lastLightValue;
-    private int lineBeginning = 0;
-    private int lineEnding = 0;
 
     @Override
     public void run(Configuration configuration) {
@@ -33,16 +31,17 @@ public class FollowWall implements Step {
         // the wall on the left or right side or until we hit the next wall.
 
         // TODO turn sensor head to side where we search the wall.
-        configuration.getSensorDataCollector().turnToRightMaximum();
+        configuration.getSensorDataCollector().turnToLeftMaximum();
         // TODO change direction when distance to wall decreases
         TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
+        TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
         UltrasonicSensor ultraSonic = configuration.getUltraSonic();
         LightSensor light = configuration.getLight();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
         followWall(movement, ultraSonic);
-        detectWall(movement, rightTouchSensor);
-        if (detectBarcode(light, sensorDataCollector)) {
+        detectWall(configuration, movement, rightTouchSensor, leftTouchSensor);
+        if (sensorDataCollector.detectBarcode(light)) {
             Sound.beep();
             Sound.beep();
             configuration.nextStep();
@@ -54,37 +53,22 @@ public class FollowWall implements Step {
         }
     }
 
-    private boolean detectBarcode(LightSensor light, SensorDataCollector sensor) {
-        int lightValue = light.getNormalizedLightValue();
-        // TODO detect line borders and count them. There must be 3 from dark to
-        // bright and 3 from bright to dark
-        if (sensor.isDark(lastLightValue) && sensor.isBright(lightValue)) {
-            // switched from dark to bright --> line starts
-            lineBeginning++;
-            Sound.beep();
-            Sound.beep();
-        }
-        if (sensor.isBright(lastLightValue) && sensor.isDark(lightValue)) {
-            // switched from dark to bright --> line ends
-            lineEnding++;
-            Sound.beep();
-            Sound.beep();
-            Sound.beep();
-        }
-        // TODO use similar mechanism as in FollowLine
-        lastLightValue = lightValue;
-        return lineBeginning >= 3 && lineEnding >= 3;
-    }
-
-    private void detectWall(MovementPrimitives movement, TouchSensor rightTouchSensor) {
-        if (!rightTouchSensor.isPressed()) {
+    private void detectWall(Configuration configuration, MovementPrimitives movement, TouchSensor rightTouchSensor,
+            TouchSensor leftTouchSensor) {
+        if (!rightTouchSensor.isPressed() && !leftTouchSensor.isPressed()) {
             return;
         }
         movement.stop();
-        movement.backup();
-        Delay.msDelay(4000);
-        movement.spinLeft();
-        Delay.msDelay(1200);
+        movement.resetSpeed();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        leftWheel.rotate(-200, true);
+        rightWheel.rotate(-200, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        rightWheel.rotate(400, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
         movement.stop();
         movement.drive();
     }
@@ -98,6 +82,8 @@ public class FollowWall implements Step {
         int gainedCorrection = correctionFactor * GAIN;
         int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
         limittedCorrection = Math.min(limittedCorrection, MAX_CORRECTION);
+        RConsole.println("d: " + distance + " c: " + correctionFactor + " g: " + gainedCorrection + " l: "
+                + limittedCorrection);
         movement.correct(limittedCorrection);
     }
 
