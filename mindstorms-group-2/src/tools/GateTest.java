@@ -32,7 +32,6 @@ public class GateTest {
             Delay.msDelay(5000);
 
             gate.passed();
-            System.out.println("Sended passing signal");
             while (!gate.waitForSuccess()) {
                 Delay.msDelay(50);
             }

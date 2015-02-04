@@ -9,6 +9,7 @@ public class GateConnection extends BluetoothConnection {
     }
 
     public void passed() {
+        System.out.println("Sended passing signal");
         writeBoolean(true);
     }
 
