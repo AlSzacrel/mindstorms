@@ -27,55 +27,83 @@ public class Elevator implements Step {
 
         // Connect to bluetooth
         try (LiftConnection lift = BluetoothCommunication.connectToLift(configuration)) {
-            RConsole.println("Connection established");
-            while (!configuration.isCancel()) {
-                RConsole.println("Collecting data");
-                DataSet sensorData = configuration.getSensorDataCollector().collectDataRow();
-                if (sensorData.size() == 0) {
-                    return;
-                }
-                float color = color(sensorData);
-                if (isWhite(color)) {
-                    RConsole.println("Found white");
-                    break;
-                }
+            System.out.println("Connection established");
+            while (!configuration.isCancel() && !lift.canDriveIn()) {
+                System.out.println("Cannot drive in");
                 Delay.msDelay(200);
+            }
+            if (configuration.isCancel()) {
+                return;
             }
 
             // TODO drive into elevator
+            System.out.println("Start to drive");
             movement.drive();
             TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
             TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
             NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
             NXTRegulatedMotor rightWheel = configuration.getRightWheel();
             while (!configuration.isCancel()) {
+                lift.canExit();
                 // TODO detect stop, use distance sensor
                 if (leftTouchSensor.isPressed() && rightTouchSensor.isPressed()) {
+                    System.out.println("left right touched");
                     movement.stop();
                     Delay.msDelay(100);
                     break;
                 }
                 if (leftTouchSensor.isPressed()) {
+                    System.out.println("left touch");
                     movement.stop();
+                    leftWheel.rotate(-20, true);
+                    rightWheel.rotate(-20, true);
+                    leftWheel.waitComplete();
+                    rightWheel.waitComplete();
                     rightWheel.rotate(-20);
+                    movement.drive();
                 }
                 if (rightTouchSensor.isPressed()) {
+                    System.out.println("right touch");
                     movement.stop();
+                    leftWheel.rotate(-20, true);
+                    rightWheel.rotate(-20, true);
+                    leftWheel.waitComplete();
+                    rightWheel.waitComplete();
                     leftWheel.rotate(-20);
+                    movement.drive();
                 }
+                Delay.msDelay(50);
             }
+            System.out.println("go down");
             lift.goDown();
             Delay.msDelay(100);
             while (!lift.canExit()) {
-                Delay.msDelay(1000);
+                Delay.msDelay(100);
             }
 
             // TODO make sure Marvin gets out of the elevator
-            leftWheel.rotate(600, true);
-            rightWheel.rotate(600, true);
-            leftWheel.waitComplete();
-            rightWheel.waitComplete();
+            movement.drive();
+            if (leftTouchSensor.isPressed()) {
+                movement.stop();
+                leftWheel.rotate(-20, true);
+                rightWheel.rotate(-20, true);
+                leftWheel.waitComplete();
+                rightWheel.waitComplete();
+                rightWheel.rotate(-20);
+                movement.drive();
+            }
+            if (rightTouchSensor.isPressed()) {
+                movement.stop();
+                leftWheel.rotate(-20, true);
+                rightWheel.rotate(-20, true);
+                leftWheel.waitComplete();
+                rightWheel.waitComplete();
+                leftWheel.rotate(-20);
+                movement.drive();
+            }
+            Delay.msDelay(4000);
             movement.stop();
+            configuration.nextStep();
         } finally {
             configuration.getLight().setFloodlight(true);
         }
@@ -92,6 +120,11 @@ public class Elevator implements Step {
 
     private boolean isWhite(float color) {
         return color > THRESHOLD;
+    }
+
+    @Override
+    public String getName() {
+        return "Elevator";
     }
 
 }

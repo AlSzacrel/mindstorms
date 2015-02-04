@@ -54,16 +54,16 @@ public class FollowLine implements Step {
             searchRight(configuration);
             searchLeft(configuration);
         }
-        if(lostNumber > 2) {
-        	configuration.getMovementPrimitives().resetSpeed();
-        	configuration.getMovementPrimitives().drive();
-        	boolean barcodeFound = false;
-        	while(!barcodeFound && !configuration.isCancel()) {
-        		barcodeFound = configuration.getSensorDataCollector().detectBarcode(configuration.getLight());
-        	}
-        	if(barcodeFound) {
-        		configuration.nextStep();
-        	}
+        if (lostNumber > 2) {
+            configuration.getMovementPrimitives().resetSpeed();
+            configuration.getMovementPrimitives().drive();
+            boolean barcodeFound = false;
+            while (!barcodeFound && !configuration.isCancel()) {
+                barcodeFound = configuration.getSensorDataCollector().detectBarcode(configuration.getLight());
+            }
+            if (barcodeFound) {
+                configuration.nextStep();
+            }
         }
     }
 
@@ -117,5 +117,10 @@ public class FollowLine implements Step {
         leftWheel.rotate(LOST_ANGLE * lostNumber);
         rightWheel.stop();
         leftWheel.stop();
+    }
+
+    @Override
+    public String getName() {
+        return "FollowLine";
     }
 }
