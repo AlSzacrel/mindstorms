@@ -6,7 +6,7 @@ import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 15;
+	private final static int SIDE_EDGE_THRESHOLD = 35;
 	private final static int LEFT_CORRECTION_FACTOR = 15;
 	private final static int RIGHT_CORRECTION_FACTOR = -10;
 	private final static int DISTANCE_ERROR = 255;
@@ -20,6 +20,8 @@ public class FollowEdge implements Step {
 		MovementPrimitives movement = configuration.getMovementPrimitives();
 		SensorDataCollector sensorDataCollector = configuration
 				.getSensorDataCollector();
+		
+		sensorDataCollector.turnToRightMaximum();
 
 		if (beginning) {
 			takeTheRamp(movement, ultraSonic);
@@ -30,17 +32,18 @@ public class FollowEdge implements Step {
 
 		if (sensorDataCollector.isBright(light.getLightValue())) {
 			configuration.nextStep();
+			movement.stop();
 		}
 
 	}
 
 	private void takeTheRamp(MovementPrimitives movement,
 			UltrasonicSensor ultraSonic) {
-		movement.crawl();
+		movement.slow();
 		movement.drive();
 		Delay.msDelay(5000);
 		movement.turnRight();
-		Delay.msDelay(100);
+		Delay.msDelay(350);
 		movement.crawl();
 		movement.drive();
 
@@ -63,8 +66,7 @@ public class FollowEdge implements Step {
 				hasStopped = false;
 			}
 
-			movement.correct(LEFT_CORRECTION_FACTOR); // TODO change magic
-														// number
+			movement.correct(LEFT_CORRECTION_FACTOR);
 			lastCorrectionWasLeft = true;
 
 			// If there is no edge
