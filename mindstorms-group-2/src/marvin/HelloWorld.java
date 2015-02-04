@@ -11,6 +11,7 @@ public class HelloWorld {
 
     private static Configuration configuration() throws IOException {
         Configuration configuration = new Configuration();
+<<<<<<< Temporary merge branch 1
         // configuration.addStep(new FollowWall());
         // configuration.addStep(new FollowLine());
         // configuration.addStep(new FollowEdge());

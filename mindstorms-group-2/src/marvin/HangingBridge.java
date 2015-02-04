@@ -197,5 +197,6 @@ public class HangingBridge implements Step {
 	public String getName() {
 		return "HangingBridge";
 	}
+>>>>>>> Temporary merge branch 2
 
 }
