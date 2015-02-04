@@ -6,10 +6,11 @@ import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 30;
+	private final static int SIDE_EDGE_THRESHOLD = 15;
 	private final static int LEFT_CORRECTION_FACTOR = 15;
 	private final static int RIGHT_CORRECTION_FACTOR = -10;
 	private final static int DISTANCE_ERROR = 255;
+	private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
 	private boolean lastCorrectionWasLeft = false;
 	private boolean beginning = true;
 
@@ -30,7 +31,7 @@ public class FollowEdge implements Step {
 
 		followEdge(movement, ultraSonic);
 
-		if (sensorDataCollector.isBright(light.getLightValue())) {
+		if (light.getNormalizedLightValue() > DETECT_ELEVATOR_LIGHT_THRESHOLD) {
 			configuration.nextStep();
 			movement.stop();
 		}
@@ -43,7 +44,7 @@ public class FollowEdge implements Step {
 		movement.drive();
 		Delay.msDelay(5000);
 		movement.turnRight();
-		Delay.msDelay(350);
+		Delay.msDelay(520);
 		movement.crawl();
 		movement.drive();
 
