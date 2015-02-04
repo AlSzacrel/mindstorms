@@ -51,10 +51,12 @@ public class Configuration implements CancelUpdater {
     private final TouchSensor rightTouchSensor;
     private final ArrayList<Step> steps = new ArrayList<>();
     private Step currentStep;
+    private final TouchSensor leftTouchSensor;
 
     public Configuration() throws IOException {
         super();
         rightTouchSensor = new TouchSensor(SensorPort.S1);
+        leftTouchSensor = new TouchSensor(SensorPort.S3);
         light = new LightSensor(SensorPort.S4);
         ultraSonic = new UltrasonicSensor(SensorPort.S2);
         leftWheel = Motor.B;
@@ -75,7 +77,10 @@ public class Configuration implements CancelUpdater {
 
     public TouchSensor getRightTouchSensor() {
         return rightTouchSensor;
+    }
 
+    public TouchSensor getLeftTouchSensor() {
+        return leftTouchSensor;
     }
 
     public LightSensor getLight() {
@@ -99,7 +104,7 @@ public class Configuration implements CancelUpdater {
     }
 
     @Override
-	public boolean isCancel() {
+    public boolean isCancel() {
         return cancel;
     }
 
