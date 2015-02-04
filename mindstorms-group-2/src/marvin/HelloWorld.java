@@ -11,9 +11,10 @@ public class HelloWorld {
 
     private static Configuration configuration() throws IOException {
         Configuration configuration = new Configuration();
-        configuration.addStep(new FollowWall());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new FollowEdge());
+        // configuration.addStep(new FollowWall());
+        // configuration.addStep(new FollowLine());
+        // configuration.addStep(new FollowEdge());
+        configuration.addStep(new Elevator());
         return configuration;
     }
 

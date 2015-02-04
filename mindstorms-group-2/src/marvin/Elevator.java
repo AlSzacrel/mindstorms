@@ -1,5 +1,8 @@
 package marvin;
 
+import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.TouchSensor;
+import lejos.nxt.comm.RConsole;
 import lejos.util.Delay;
 
 import communication.BluetoothCommunication;
@@ -10,7 +13,7 @@ public class Elevator implements Step {
     // rot [435,447]
     // grüne [400,423]
     // Colors changed. Red is now darker.
-    private static final int THRESHOLD = 350;
+    private static final int THRESHOLD = 450;
 
     @Override
     public void run(Configuration configuration) {
@@ -18,31 +21,61 @@ public class Elevator implements Step {
         configuration.getLight().setFloodlight(false);
         movement.slow();
         movement.stop();
+        RConsole.println("Elevator step started");
+
+        // TODO align in drive direction
+
+        // Connect to bluetooth
         try (LiftConnection lift = BluetoothCommunication.connectToLift(configuration)) {
+            RConsole.println("Connection established");
             while (!configuration.isCancel()) {
+                RConsole.println("Collecting data");
                 DataSet sensorData = configuration.getSensorDataCollector().collectDataRow();
                 if (sensorData.size() == 0) {
                     return;
                 }
                 float color = color(sensorData);
-                if (isGreen(color)) {
+                if (isWhite(color)) {
+                    RConsole.println("Found white");
                     break;
                 }
                 Delay.msDelay(200);
             }
 
+            // TODO drive into elevator
             movement.drive();
-            // TODO detect stop, use distance sensor
-            Delay.msDelay(4000);
-            movement.stop();
-            Delay.msDelay(2000);
+            TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
+            TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
+            NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+            NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+            while (!configuration.isCancel()) {
+                // TODO detect stop, use distance sensor
+                if (leftTouchSensor.isPressed() && rightTouchSensor.isPressed()) {
+                    movement.stop();
+                    Delay.msDelay(100);
+                    break;
+                }
+                if (leftTouchSensor.isPressed()) {
+                    movement.stop();
+                    rightWheel.rotate(-20);
+                }
+                if (rightTouchSensor.isPressed()) {
+                    movement.stop();
+                    leftWheel.rotate(-20);
+                }
+            }
             lift.goDown();
+            Delay.msDelay(100);
             while (!lift.canExit()) {
                 Delay.msDelay(1000);
             }
-            movement.drive();
+
             // TODO make sure Marvin gets out of the elevator
-            Delay.msDelay(5000);
+            leftWheel.rotate(600, true);
+            rightWheel.rotate(600, true);
+            leftWheel.waitComplete();
+            rightWheel.waitComplete();
+            movement.stop();
         } finally {
             configuration.getLight().setFloodlight(true);
         }
@@ -57,7 +90,7 @@ public class Elevator implements Step {
         return colorAVG;
     }
 
-    private boolean isGreen(float color) {
+    private boolean isWhite(float color) {
         return color > THRESHOLD;
     }
 

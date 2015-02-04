@@ -52,6 +52,7 @@ public class BluetoothCommunication {
     public static LiftConnection connectToLift(CancelUpdater configuration) {
         while (!openConnection(LIFT) && !configuration.isCancel()) {
             Delay.msDelay(1000); // waiting for free connection
+            System.out.println("Trying to connect to Lift");
         }
 
         return new LiftConnection(connection);
@@ -60,6 +61,7 @@ public class BluetoothCommunication {
     public static TurnTableConnection connectToTurnTable(CancelUpdater configuration) {
         while (!openConnection(TURN_TABLE) && !configuration.isCancel()) {
             Delay.msDelay(1000); // waiting for free connection
+            System.out.println("Trying to connect to TurnTable");
         }
 
         return new TurnTableConnection(connection);
