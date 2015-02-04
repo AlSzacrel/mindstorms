@@ -13,6 +13,7 @@ public class HelloWorld {
         Configuration configuration = new Configuration();
         configuration.addStep(new FollowWall());
         configuration.addStep(new FollowLine());
+        configuration.addStep(new FollowEdge());
         return configuration;
     }
 

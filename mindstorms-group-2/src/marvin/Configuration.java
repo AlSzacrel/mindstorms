@@ -32,6 +32,7 @@ public class Configuration implements CancelUpdater {
     }
 
     public static final int MAX_ANGLE = 150;
+    public static final int EDGE_DETECTION_ANGLE = 50;
     private static final String SENSOR_DATA_FILE_NAME = "sensorData.txt";
     private static final boolean DEBUG_MODE = false;
     private static final boolean REMOTE_DEBUG = false;
@@ -198,9 +199,10 @@ public class Configuration implements CancelUpdater {
 
     public void nextStep() {
         if (steps.isEmpty()) {
-            return;
+        	return;
         }
         currentStep = steps.remove(0);
+        sensorDataCollector.resetBarcode();
         System.out.println("Next step");
     }
 

@@ -54,6 +54,17 @@ public class FollowLine implements Step {
             searchRight(configuration);
             searchLeft(configuration);
         }
+        if(lostNumber > 2) {
+        	configuration.getMovementPrimitives().resetSpeed();
+        	configuration.getMovementPrimitives().drive();
+        	boolean barcodeFound = false;
+        	while(!barcodeFound && !configuration.isCancel()) {
+        		barcodeFound = configuration.getSensorDataCollector().detectBarcode(configuration.getLight());
+        	}
+        	if(barcodeFound) {
+        		configuration.nextStep();
+        	}
+        }
     }
 
     private void searchRight(Configuration configuration) {

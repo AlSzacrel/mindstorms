@@ -8,6 +8,7 @@ public class MovementPrimitives {
     private static final float BACKUP_FACTOR = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
+	private static final float SPEED_FACTOR_STALK = SPEED_FACTOR_CRAWL / 4f;
     private float speed = 0;
     public final Configuration conf;
 
@@ -26,6 +27,10 @@ public class MovementPrimitives {
 
     public void crawl() {
         speed = SPEED_FACTOR_CRAWL * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+    }
+
+    public void stalk() {
+        speed = SPEED_FACTOR_STALK * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
     }
 
     public void drive() {
@@ -104,4 +109,9 @@ public class MovementPrimitives {
         conf.getLeftWheel().setSpeed(speed);
         conf.getRightWheel().setSpeed(speed);
     }
+
+	public void searchBarcode() {
+		// TODO Auto-generated method stub
+		
+	}
 }
