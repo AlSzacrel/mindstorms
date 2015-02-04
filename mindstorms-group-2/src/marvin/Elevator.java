@@ -55,21 +55,21 @@ public class Elevator implements Step {
                 if (leftTouchSensor.isPressed()) {
                     System.out.println("left touch");
                     movement.stop();
-                    leftWheel.rotate(-20, true);
-                    rightWheel.rotate(-20, true);
+                    leftWheel.rotate(-80, true);
+                    rightWheel.rotate(-80, true);
                     leftWheel.waitComplete();
                     rightWheel.waitComplete();
-                    rightWheel.rotate(-20);
+                    rightWheel.rotate(-40);
                     movement.drive();
                 }
                 if (rightTouchSensor.isPressed()) {
                     System.out.println("right touch");
                     movement.stop();
-                    leftWheel.rotate(-20, true);
-                    rightWheel.rotate(-20, true);
+                    leftWheel.rotate(-80, true);
+                    rightWheel.rotate(-80, true);
                     leftWheel.waitComplete();
                     rightWheel.waitComplete();
-                    leftWheel.rotate(-20);
+                    leftWheel.rotate(-40);
                     movement.drive();
                 }
                 Delay.msDelay(50);
