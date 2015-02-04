@@ -6,13 +6,11 @@ import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 15;
-	private final static int LEFT_CORRECTION_FACTOR = 35;
-	private final static int RIGHT_CORRECTION_FACTOR = -23;
+	private final static int SIDE_EDGE_THRESHOLD = 30;
+	private final static int LEFT_CORRECTION_FACTOR = 15;
+	private final static int RIGHT_CORRECTION_FACTOR = -10;
 	private final static int DISTANCE_ERROR = 255;
-	private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
 	private boolean lastCorrectionWasLeft = false;
-	private int iterativeLeftCorrectionFactor = LEFT_CORRECTION_FACTOR; 
 	private boolean beginning = true;
 
 	@Override
@@ -24,7 +22,6 @@ public class FollowEdge implements Step {
 				.getSensorDataCollector();
 		
 		sensorDataCollector.turnToRightMaximum();
-		//light.setFloodlight(false);
 
 		if (beginning) {
 			takeTheRamp(movement, ultraSonic);
@@ -33,7 +30,7 @@ public class FollowEdge implements Step {
 
 		followEdge(movement, ultraSonic);
 
-		if (light.getNormalizedLightValue() > DETECT_ELEVATOR_LIGHT_THRESHOLD) {
+		if (sensorDataCollector.isBright(light.getLightValue())) {
 			configuration.nextStep();
 			movement.stop();
 		}
@@ -44,10 +41,10 @@ public class FollowEdge implements Step {
 			UltrasonicSensor ultraSonic) {
 		movement.slow();
 		movement.drive();
-		Delay.msDelay(2000);
+		Delay.msDelay(5000);
 		movement.turnRight();
-		Delay.msDelay(200);
-		movement.fullSpeed();
+		Delay.msDelay(350);
+		movement.crawl();
 		movement.drive();
 
 		while (getAverageDistance(ultraSonic) < SIDE_EDGE_THRESHOLD) {
@@ -65,20 +62,18 @@ public class FollowEdge implements Step {
 		if (medDistance > SIDE_EDGE_THRESHOLD) {
 
 			if (!lastCorrectionWasLeft || hasStopped) {
-				movement.fullSpeed();
-				iterativeLeftCorrectionFactor = LEFT_CORRECTION_FACTOR;
+				movement.crawl();
 				hasStopped = false;
 			}
 
-			movement.correct(iterativeLeftCorrectionFactor);
-			iterativeLeftCorrectionFactor = (int) (iterativeLeftCorrectionFactor * 0.75);
+			movement.correct(LEFT_CORRECTION_FACTOR);
 			lastCorrectionWasLeft = true;
 
 			// If there is no edge
 		} else {
 
 			if (lastCorrectionWasLeft || hasStopped) {
-				movement.fullSpeed();
+				movement.crawl();
 				hasStopped = false;
 			}
 			movement.correct(RIGHT_CORRECTION_FACTOR);
