@@ -6,14 +6,15 @@ import lejos.util.Delay;
 
 public class HangingBridge implements Step {
 
-
 	private final static int SIDE_EDGE_THRESHOLD = 15;
 	private final static int LEFT_CORRECTION_FACTOR = 10;
 	private final static int RIGHT_CORRECTION_FACTOR = -10;
 	private final static int DISTANCE_ERROR = 255;
+	private final static int N_GAPS_TOTAL = 14;
 	private boolean lastCorrectionWasLeft = false;
 	private boolean beginning = true;
-	
+	private boolean floorWasBright = false;
+	private int nGaps = 0;
 
 	@Override
 	public void run(Configuration configuration) {
@@ -23,7 +24,7 @@ public class HangingBridge implements Step {
 		MovementPrimitives movement = configuration.getMovementPrimitives();
 		SensorDataCollector sensorDataCollector = configuration
 				.getSensorDataCollector();
-		
+
 		sensorDataCollector.turnToRightMaximum();
 
 		if (beginning) {
@@ -41,11 +42,24 @@ public class HangingBridge implements Step {
 			beginning = false;
 		}
 		followEdge(movement, ultraSonic);
-		
-		
+
+		if (sensorDataCollector.isDark(light.getNormalizedLightValue())
+				&& floorWasBright) {
+			floorWasBright = false;
+			nGaps += 1;
+
+			if (nGaps > N_GAPS_TOTAL) {
+				configuration.nextStep();
+				movement.stop();
+			}
+
+		} else if (sensorDataCollector
+				.isBright(light.getNormalizedLightValue())) {
+			floorWasBright = true;
+		}
+
 		// TODO: find end
 	}
-
 
 	private void followEdge(MovementPrimitives movement,
 			UltrasonicSensor ultraSonic) {
@@ -72,8 +86,7 @@ public class HangingBridge implements Step {
 			lastCorrectionWasLeft = false;
 		}
 	}
-	
-	
+
 	private float getAverageDistance(UltrasonicSensor ultraSonic) {
 
 		// get a mean distance value
@@ -94,6 +107,5 @@ public class HangingBridge implements Step {
 		}
 		return medDistance;
 	}
-
 
 }
