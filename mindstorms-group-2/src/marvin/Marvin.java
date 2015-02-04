@@ -2,6 +2,8 @@ package marvin;
 
 import java.io.IOException;
 
+import lejos.nxt.comm.RConsole;
+
 public class Marvin {
 
     private boolean running = true;
@@ -15,12 +17,13 @@ public class Marvin {
         configuration.startConsole();
         // RConsole.println("collect data");
         // RConsole.println(configuration.getLines().toString());
-        configuration.getMovementPrimitives().slow();
+        configuration.getMovementPrimitives().crawl();
         while (running) {
             cancelRun();
             configuration.displayInformation();
             // configuration.getMovementPrimitives().crawl();
             // configuration.getMovementPrimitives().drive();
+            RConsole.println("" + configuration.getUltraSonic().getDistance());
             configuration.runCurrentStep();
 
             // DataSet dataRow =
