@@ -10,9 +10,10 @@ public class FollowEdge implements Step {
     private final static int LEFT_CORRECTION_FACTOR = 15;
     private final static int RIGHT_CORRECTION_FACTOR = -10;
     private final static int DISTANCE_ERROR = 255;
+	private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
     private boolean lastCorrectionWasLeft = false;
 
-    // private boolean beginning = true;
+	private boolean beginning = true;
 
     @Override
     public void run(Configuration configuration) {
@@ -21,35 +22,36 @@ public class FollowEdge implements Step {
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
 
-        // if (beginning) {
-        // takeTheRamp(movement, ultraSonic);
-        // beginning = false;
-        // }
+		sensorDataCollector.turnToRightMaximum();
+
+		if (beginning) {
+			takeTheRamp(movement, ultraSonic);
+			beginning = false;
+		}
 
         followEdge(movement, ultraSonic);
 
-        if (sensorDataCollector.isBright(light.getLightValue())) {
+		if (light.getNormalizedLightValue() > DETECT_ELEVATOR_LIGHT_THRESHOLD) {
             configuration.nextStep();
+			movement.stop();
         }
 
     }
 
-    // private void takeTheRamp(MovementPrimitives movement,
-    // UltrasonicSensor ultraSonic) {
-    // movement.stalk();
-    // movement.drive();
-    // Delay.msDelay(7000); // TODO magic numbers
-    //
-    // // movement.backup();
-    // // Delay.msDelay(200);
-    //
-    // movement.slow();
-    // movement.drive();
-    //
-    // while (getAverageDistance(ultraSonic) < 255) {
-    // Delay.msDelay(20);
-    // }
-    // }
+	private void takeTheRamp(MovementPrimitives movement,
+			UltrasonicSensor ultraSonic) {
+		movement.slow();
+		movement.drive();
+		Delay.msDelay(5000);
+		movement.turnRight();
+		Delay.msDelay(520);
+		movement.crawl();
+		movement.drive();
+
+		while (getAverageDistance(ultraSonic) < SIDE_EDGE_THRESHOLD) {
+			Delay.msDelay(20);
+		}
+	}
 
     private void followEdge(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
 
@@ -64,9 +66,9 @@ public class FollowEdge implements Step {
                 hasStopped = false;
             }
 
-            movement.correct(LEFT_CORRECTION_FACTOR); // TODO change magic
-            // number
-            lastCorrectionWasLeft = true;
+            
+			movement.correct(LEFT_CORRECTION_FACTOR);
+lastCorrectionWasLeft = true;
 
             // If there is no edge
         } else {
