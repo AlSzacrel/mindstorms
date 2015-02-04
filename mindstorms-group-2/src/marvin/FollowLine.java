@@ -17,6 +17,7 @@ public class FollowLine implements Step {
     @Override
     public void run(Configuration configuration) {
         MovementPrimitives movement = configuration.getMovementPrimitives();
+        configuration.getMovementPrimitives().crawl();
         // stupidVersion(configuration);
         LineBorders lineData = configuration.getSensorDataCollector().collectLineData();
 
