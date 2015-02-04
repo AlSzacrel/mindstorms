@@ -31,6 +31,9 @@ public class LiftTest {
                 return Button.ESCAPE.isDown();
             }
         })) {
+            while (!lift.canDriveIn()) {
+                Delay.msDelay(100);
+            }
             lift.goDown();
 
             LCD.drawString("Going down", 0, 1);
