@@ -6,8 +6,8 @@ import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 20;
-	private final static int LEFT_CORRECTION_FACTOR = 32;
+	private final static int SIDE_EDGE_THRESHOLD = 15;
+	private final static int LEFT_CORRECTION_FACTOR = 35;
 	private final static int RIGHT_CORRECTION_FACTOR = -23;
 	private final static int DISTANCE_ERROR = 255;
 	private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
@@ -42,7 +42,7 @@ public class FollowEdge implements Step {
 
 	private void takeTheRamp(MovementPrimitives movement,
 			UltrasonicSensor ultraSonic) {
-		movement.fullSpeed();
+		movement.slow();
 		movement.drive();
 		Delay.msDelay(2000);
 		movement.turnRight();
