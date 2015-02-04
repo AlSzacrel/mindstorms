@@ -18,10 +18,12 @@ public class HelloWorld {
         // configuration.addStep(new FollowWall());
         // // TODO gate
         // configuration.addStep(new HangingBridge());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new TurnTable());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new EmptyStep());
+//        configuration.addStep(new FollowLine());
+//        configuration.addStep(new TurnTable());
+//        configuration.addStep(new FollowLine());
+//        configuration.addStep(new EmptyStep());
+        
+        configuration.addStep(new HangingBridge());
         return configuration;
     }
 

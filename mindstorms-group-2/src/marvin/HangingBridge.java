@@ -1,31 +1,39 @@
 package marvin;
 
 import lejos.nxt.LightSensor;
+import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
 import lejos.util.Delay;
 
 public class HangingBridge implements Step {
 
-	private final static int SIDE_EDGE_THRESHOLD = 15;
-	private final static int LEFT_CORRECTION_FACTOR = 10;
-	private final static int RIGHT_CORRECTION_FACTOR = -10;
-	private final static int DISTANCE_ERROR = 255;
-	private final static int N_GAPS_TOTAL = 14;
+	// follow wall
+	private final static int NO_WALL = 30;
+	private FollowWall followWall = new FollowWall();
+
 	// follow line
 	private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
 	private static final int LOW_THRESHOLD = 5;
 	private static final float GAIN = 0.5f;
+	private FollowLine followLine = new FollowLine();
 
+	// drive the bridge
+	private final static int SIDE_EDGE_THRESHOLD = 25;
+	private final static int LEFT_CORRECTION_FACTOR = 10;
+	private final static int RIGHT_CORRECTION_FACTOR = -10;
+	private final static int N_GAPS_TOTAL = 14;
+	private final static int BRIGHTNESS_THRESHOLD = 280;
+	private int nGaps = 0;
+	private int nDarkRounds = 0;
 	private boolean lastCorrectionWasLeft = false;
-	private boolean followWallPart = true;
-	private boolean followLinePart = false;
 	private boolean floorWasBright = false;
 
-	private int nGaps = 0;
-
-	private FollowWall followWall = new FollowWall();
-	private FollowLine followLine = new FollowLine();
+	// control states
+	private boolean followWallPart = true;
+	private boolean followLinePart = false;
+	private boolean reachedEndOfBridge = false;
+	private boolean beginningOfPart = true;
 
 	@Override
 	public void run(Configuration configuration) {
@@ -36,85 +44,133 @@ public class HangingBridge implements Step {
 		SensorDataCollector sensorDataCollector = configuration
 				.getSensorDataCollector();
 
-		movement.crawl();
-		movement.drive();
-
-		// follow the right wall until we either find the line or loose it
+		// follow the right wall until we either find the line or loose the wall
 		if (followWallPart) {
-			followWall(sensorDataCollector, movement, light, ultraSonic);
-
-		} else if (followLinePart) {
-			followLine(sensorDataCollector, movement);
-
-		} else {
-			sensorDataCollector.turnToRightMaximum();
-			followEdge(movement, ultraSonic);
-
-			if (sensorDataCollector.isDark(light.getNormalizedLightValue())
-					&& floorWasBright) {
-				floorWasBright = false;
-				nGaps += 1;
-
-				if (nGaps > N_GAPS_TOTAL) {
-					configuration.nextStep();
-					movement.stop();
-				}
-
-			} else if (sensorDataCollector.isBright(light
-					.getNormalizedLightValue())) {
-				floorWasBright = true;
+			if (beginningOfPart) {
+				movement.crawl();
+				movement.drive();
+				sensorDataCollector.turnToLeftMaximum();
+				beginningOfPart = false;
 			}
 
-		}
+			if (sensorDataCollector.isBright(light.getNormalizedLightValue())
+					|| ultraSonic.getDistance() > NO_WALL) {
+				followWallPart = false;
+				followLinePart = true;
+				beginningOfPart = true;
+				return;
+			}
 
-		// TODO: find end
+			followWall.followWall(movement, ultraSonic);
+
+		} else if (followLinePart) {
+
+			if (beginningOfPart) {
+				if (!sensorDataCollector.isBright(light
+						.getNormalizedLightValue())) {
+					followLine.lost(configuration);
+				}
+				beginningOfPart = false;
+			}
+
+			LineBorders dataLine = sensorDataCollector.collectLineData();
+			int leftBorder = dataLine.getDarkToBright();
+			int rightBorder = dataLine.getBrightToDark();
+			int center = (leftBorder + rightBorder) / 2;
+
+			if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
+				dataLine = sensorDataCollector.collectLineData();
+				leftBorder = dataLine.getDarkToBright();
+				rightBorder = dataLine.getBrightToDark();
+				center = (leftBorder + rightBorder) / 2;
+
+				if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
+					followLinePart = false;
+					beginningOfPart = true;
+				}
+
+			} else {
+				followLine(movement, center);
+			}
+
+		} else {
+
+			if (beginningOfPart) {
+				sensorDataCollector.turnToRightMaximum();
+				beginningOfPart = false;
+			}
+
+			followHangingBridge(sensorDataCollector, movement, light,
+					ultraSonic);
+
+			if (reachedEndOfBridge) {
+				//TODO remove this delay if stop() is removed
+				movement.crawl();
+				movement.drive();
+				Delay.msDelay(250);
+				configuration.nextStep();
+				movement.stop();
+			}
+		}
 	}
 
-	private void followLine(SensorDataCollector sensorDataCollector, MovementPrimitives movement) {
-		
-		LineBorders lineData = sensorDataCollector.collectLineData();
+	private void followHangingBridge(SensorDataCollector sensorDataCollector,
+			MovementPrimitives movement, LightSensor light,
+			UltrasonicSensor ultraSonic) {
+		followEdge(movement, ultraSonic);
 
-		int leftBorder = lineData.getDarkToBright();
-		int rightBorder = lineData.getBrightToDark();
+		if (sensorDataCollector.isDark(light.getNormalizedLightValue())) {
 
-		if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
-			followLinePart = false;
-			return;
+			if (!floorWasBright) {
+				nDarkRounds += 1;
+				Sound.beep();
+			}			
+
+			floorWasBright = false;
+
+
+			if (nDarkRounds > 4) {
+				reachedEndOfBridge = true;
+			}
+
+		} else if (light.getNormalizedLightValue() > BRIGHTNESS_THRESHOLD) {
+			floorWasBright = true;
 		}
 
-		int center = (leftBorder + rightBorder) / 2;
+		// if (light.getNormalizedLightValue() <= BRIGHTNESS_THRESHOLD
+		// && floorWasBright) {
+		// floorWasBright = false;
+		// nGaps += 1;
+		// Sound.beep();
+		//
+		// if (nGaps > N_GAPS_TOTAL) {
+		// reachedEndOfBridge = true;
+		// }
+		//
+		// } else if (light.getNormalizedLightValue() > BRIGHTNESS_THRESHOLD &&
+		// !floorWasBright) {
+		// floorWasBright = true;
+		//
+		// Sound.beep();
+		// Delay.msDelay(20);
+		// Sound.beep();
+		// }
+	}
+
+	private void followLine(MovementPrimitives movement, int center) {
 
 		int correctionFactor = ((Configuration.MAX_ANGLE / 2) - center);
 		int gainedFactor = (int) (correctionFactor * GAIN);
 
 		RConsole.println("" + gainedFactor);
 		movement.correct(gainedFactor);
-		
-	}
 
-	private void followWall(SensorDataCollector sensorDataCollector,
-			MovementPrimitives movement, LightSensor light,
-			UltrasonicSensor ultraSonic) {
-		sensorDataCollector.turnToLeftMaximum();
-		followWall.followWall(movement, ultraSonic);
-
-		if (sensorDataCollector.isBright(light.getNormalizedLightValue())
-				|| ultraSonic.getDistance() == DISTANCE_ERROR) {
-
-			followWallPart = false;
-			// if
-			// (!sensorDataCollector.isBright(light.getNormalizedLightValue()))
-			// {
-			// followLine.lost(configuration);
-			// }
-			followLinePart = true;
-		}
 	}
 
 	private void followEdge(MovementPrimitives movement,
 			UltrasonicSensor ultraSonic) {
 
-		float medDistance = getAverageDistance(ultraSonic);
+		float medDistance = FollowEdge.getAverageDistance(ultraSonic);
 
 		// If there is an edge
 		if (medDistance > SIDE_EDGE_THRESHOLD) {
@@ -137,25 +193,9 @@ public class HangingBridge implements Step {
 		}
 	}
 
-	private float getAverageDistance(UltrasonicSensor ultraSonic) {
-
-		// get a mean distance value
-		float medDistance = ultraSonic.getDistance();
-		int currentDistance;
-
-		while (medDistance == DISTANCE_ERROR) {
-			medDistance = ultraSonic.getDistance();
-		}
-
-		for (int i = 0; i < 6; i++) {
-			Delay.msDelay(5);
-			currentDistance = ultraSonic.getDistance();
-
-			if (currentDistance != DISTANCE_ERROR) {
-				medDistance = Filter.avgEWMA(medDistance, currentDistance);
-			}
-		}
-		return medDistance;
+	@Override
+	public String getName() {
+		return "HangingBridge";
 	}
 
 }
