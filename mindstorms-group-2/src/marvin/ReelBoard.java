@@ -1,6 +1,5 @@
 package marvin;
 
-import lejos.nxt.LightSensor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
@@ -29,29 +28,47 @@ public class ReelBoard implements Step {
         // pilot.setTravelSpeed(pilot.getMaxTravelSpeed());
         NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
         NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        // TODO use turnAround from MovementPrimitives on master branch
+        leftWheel.rotate(-400, true);
+        rightWheel.rotate(-400, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        turnAround(leftWheel, rightWheel);
         try (GateConnection gate = BluetoothCommunication.connectToGate(configuration)) {
-            leftWheel.rotate(1600, true);
-            rightWheel.rotate(1600, true);
-            SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
-            LightSensor light = configuration.getLight();
-            boolean lineDetected = false;
-            while (!configuration.isCancel() && !lineDetected && leftWheel.isMoving()) {
-                followWall(configuration.getMovementPrimitives(), configuration.getUltraSonic());
-                // lineDetected =
-                // sensorDataCollector.isBright(light.getNormalizedLightValue());
-            }
-            leftWheel.stop();
-            rightWheel.stop();
+            leftWheel.rotate(-3600, true);
+            rightWheel.rotate(-3600, true);
+            // SensorDataCollector sensorDataCollector =
+            // configuration.getSensorDataCollector();
+            // LightSensor light = configuration.getLight();
+            // boolean lineDetected = false;
+            // while (!configuration.isCancel() && !lineDetected &&
+            // leftWheel.isMoving()) {
+            // followWall(configuration.getMovementPrimitives(),
+            // configuration.getUltraSonic());
+            // // lineDetected =
+            // // sensorDataCollector.isBright(light.getNormalizedLightValue());
+            // }
+            // leftWheel.stop();
+            // rightWheel.stop();
 
             // TODO watch distance
             // Delay.msDelay(5000);
             // configuration.getMovementPrimitives().stop();
+            leftWheel.waitComplete();
+            rightWheel.waitComplete();
             gate.passed();
             while (!gate.waitForSuccess()) {
                 Delay.msDelay(50);
             }
             System.out.println("Successful passed");
         }
+    }
+
+    private void turnAround(NXTRegulatedMotor leftWheel, NXTRegulatedMotor rightWheel) {
+        leftWheel.rotate(-400, true);
+        rightWheel.rotate(400, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
     }
 
     private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
