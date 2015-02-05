@@ -39,7 +39,7 @@ public class FollowLine implements Step {
         movement.correct(gainedFactor);
     }
 
-    private void resetLost(boolean foundLeft) {
+    public void resetLost(boolean foundLeft) {
         lostNumber = 0;
         this.foundLeft = foundLeft;
     }
@@ -123,6 +123,29 @@ public class FollowLine implements Step {
         rightWheel.stop();
         leftWheel.stop();
     }
+        
+    /**
+	 * @return false if we loose the line, true if we found the line and corrected.
+	 */
+	public static boolean followShortAndStraightLine(MovementPrimitives movement, SensorDataCollector sensorDataCollector) {
+
+		LineBorders dataLine = sensorDataCollector.collectLineData();
+		int leftBorder = dataLine.getDarkToBright();
+		int rightBorder = dataLine.getBrightToDark();
+		int center = (leftBorder + rightBorder) / 2;
+
+		if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
+			return false;
+		}
+		int correctionFactor = ((Configuration.MAX_ANGLE / 2) - center);
+		int gainedFactor = (int) (correctionFactor * GAIN);
+
+		RConsole.println("" + gainedFactor);
+		movement.correct(gainedFactor);
+
+		return true;
+	}
+
 
     @Override
     public String getName() {
