@@ -1,5 +1,7 @@
 package marvin;
 
+import lejos.nxt.NXTRegulatedMotor;
+
 public class MovementPrimitives {
     private static final float CORRECTION_FACTOR = 0.75f;
     private static final float TURN_FACTOR = 0.5f;
@@ -11,103 +13,114 @@ public class MovementPrimitives {
 	private static final float SPEED_FACTOR_STALK = SPEED_FACTOR_CRAWL / 4f;
     private float speed = 0;
     public final Configuration conf;
+    private NXTRegulatedMotor leftWheel;
+    private NXTRegulatedMotor rightWheel;
 
     public MovementPrimitives(Configuration conf) {
         this.conf = conf;
-        slow();
+        leftWheel = conf.getLeftWheel();
+        rightWheel = conf.getRightWheel();
+        slow();       
     }
 
     public void fullSpeed() {
-        speed = SPEED_FACTOR_FULL * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_FULL * Math.min(leftWheel.getMaxSpeed(), rightWheel.getMaxSpeed());
     }
 
     public void slow() {
-        speed = SPEED_FACTOR_SLOW * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_SLOW * Math.min(leftWheel.getMaxSpeed(), rightWheel.getMaxSpeed());
     }
 
     public void crawl() {
-        speed = SPEED_FACTOR_CRAWL * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_CRAWL * Math.min(leftWheel.getMaxSpeed(), rightWheel.getMaxSpeed());
     }
 
     public void stalk() {
-        speed = SPEED_FACTOR_STALK * Math.min(conf.getLeftWheel().getMaxSpeed(), conf.getRightWheel().getMaxSpeed());
+        speed = SPEED_FACTOR_STALK * Math.min(leftWheel.getMaxSpeed(), rightWheel.getMaxSpeed());
     }
 
     public void drive() {
-        conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(speed);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(speed);
+        rightWheel.setSpeed(speed);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void backup() {
-        conf.getLeftWheel().setSpeed(BACKUP_FACTOR * speed);
-        conf.getRightWheel().setSpeed(BACKUP_FACTOR * speed);
-        conf.getLeftWheel().backward();
-        conf.getRightWheel().backward();
+        leftWheel.setSpeed(BACKUP_FACTOR * speed);
+        rightWheel.setSpeed(BACKUP_FACTOR * speed);
+        leftWheel.backward();
+        rightWheel.backward();
     }
 
     public void stop() {
-        conf.getLeftWheel().stop();
-        conf.getRightWheel().stop();
+        leftWheel.stop();
+        rightWheel.stop();
     }
 
     public void correctionLeft() {
-        conf.getLeftWheel().setSpeed(CORRECTION_FACTOR * speed);
-        conf.getRightWheel().setSpeed(speed);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(CORRECTION_FACTOR * speed);
+        rightWheel.setSpeed(speed);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void correctionRight() {
-        conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(CORRECTION_FACTOR * speed);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(speed);
+        rightWheel.setSpeed(CORRECTION_FACTOR * speed);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void turnLeft() {
-        conf.getLeftWheel().setSpeed(TURN_FACTOR * speed);
-        conf.getRightWheel().setSpeed(speed);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(TURN_FACTOR * speed);
+        rightWheel.setSpeed(speed);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void turnRight() {
-        conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(TURN_FACTOR * speed);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(speed);
+        rightWheel.setSpeed(TURN_FACTOR * speed);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void spinLeft() {
-        conf.getLeftWheel().setSpeed(SPIN_FACTOR * speed);
-        conf.getRightWheel().setSpeed(SPIN_FACTOR * speed);
-        conf.getLeftWheel().rotate(-90, true);
-        conf.getRightWheel().rotate(90, true);
-        conf.getLeftWheel().waitComplete();
-        conf.getRightWheel().waitComplete();
+        leftWheel.setSpeed(SPIN_FACTOR * speed);
+        rightWheel.setSpeed(SPIN_FACTOR * speed);
+        leftWheel.rotate(-90, true);
+        rightWheel.rotate(90, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
     }
 
     public void spinRight() {
-        conf.getLeftWheel().setSpeed(SPIN_FACTOR * speed);
-        conf.getRightWheel().setSpeed(SPIN_FACTOR * speed);
-        conf.getLeftWheel().rotate(90, true);
-        conf.getRightWheel().rotate(-90, true);
-        conf.getLeftWheel().waitComplete();
-        conf.getRightWheel().waitComplete();
+        leftWheel.setSpeed(SPIN_FACTOR * speed);
+        rightWheel.setSpeed(SPIN_FACTOR * speed);
+        leftWheel.rotate(90, true);
+        rightWheel.rotate(-90, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
     }
+    
+    public void turnAround(){
+    	 leftWheel.rotate(-400, true);
+         rightWheel.rotate(400, true);
+         leftWheel.waitComplete();
+         rightWheel.waitComplete();
+    } 
 
     public void correct(int correctionFactor) {
-        conf.getLeftWheel().setSpeed(speed - correctionFactor);
-        conf.getRightWheel().setSpeed(speed + correctionFactor);
-        conf.getLeftWheel().forward();
-        conf.getRightWheel().forward();
+        leftWheel.setSpeed(speed - correctionFactor);
+        rightWheel.setSpeed(speed + correctionFactor);
+        leftWheel.forward();
+        rightWheel.forward();
     }
 
     public void resetSpeed() {
-        conf.getLeftWheel().setSpeed(speed);
-        conf.getRightWheel().setSpeed(speed);
+        leftWheel.setSpeed(speed);
+        rightWheel.setSpeed(speed);
     }
 
 	public void searchBarcode() {

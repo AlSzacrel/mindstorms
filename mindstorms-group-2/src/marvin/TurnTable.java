@@ -33,10 +33,7 @@ public class TurnTable extends FollowLine {
             rightWheel.rotate(-800, true);
             leftWheel.waitComplete();
             rightWheel.waitComplete();
-            leftWheel.rotate(-400, true);
-            rightWheel.rotate(400, true);
-            leftWheel.waitComplete();
-            rightWheel.waitComplete();
+           
         }
     }
 
