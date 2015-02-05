@@ -31,12 +31,12 @@ public class Elevator implements Step {
 		try (LiftConnection lift = BluetoothCommunication
 				.connectToLift(configuration)) {
 			System.out.println("Connection established");
-			
+
 			while (!configuration.isCancel() && !lift.canDriveIn()) {
 				System.out.println("Cannot drive in");
 				Delay.msDelay(200);
 			}
-			
+
 			if (configuration.isCancel()) {
 				return;
 			}
@@ -49,38 +49,65 @@ public class Elevator implements Step {
 			NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
 			NXTRegulatedMotor rightWheel = configuration.getRightWheel();
 
-			leftWheel.rotate(-20, true);
-			rightWheel.rotate(20, true);
+			leftWheel.rotate(-30, true);
+			rightWheel.rotate(30);
 			leftWheel.waitComplete();
-			rightWheel.waitComplete();
 			movement.drive();
-			movement.correct(-15);
+			movement.correct(-20);
+			boolean touchedLeft = false;
+			boolean touchedRight = false;
+
+			while (!configuration.isCancel() && !leftTouchSensor.isPressed()
+					&& !rightTouchSensor.isPressed()) {
+				Delay.msDelay(20);
+			}
+			
+			// TODO abfangen, dass der roboter am anfang gegen die schrägen teile stößt
 
 			while (!configuration.isCancel()) {
 				lift.canExit(); // heartbeat so elevator knows we're still there
 
 				if (leftTouchSensor.isPressed() && rightTouchSensor.isPressed()) {
 					System.out.println("left right touched");
+					movement.fullSpeed();
+					Delay.msDelay(100);
 					movement.stop();
 					break;
 
 				} else if (!leftTouchSensor.isPressed()
 						&& !rightTouchSensor.isPressed()) {
+
+					movement.slow();
+					movement.drive();
 					Delay.msDelay(20);
 
-				} else if (leftTouchSensor.isPressed()) {
+				} else if (leftTouchSensor.isPressed() && !touchedRight) {
 
-					leftWheel.rotate(10);
+					leftWheel.rotate(30);
 					rightWheel.stop();
-					Delay.msDelay(20);
-					rightWheel.waitComplete();
+					touchedLeft = true;
+
+					// wahrscheinlich sind wir hinten an der wand
+				} else if (leftTouchSensor.isPressed() && touchedRight
+						&& !touchedLeft) {
+					rightWheel.rotate(50);
+					leftWheel.stop();
+
+				} else if (rightTouchSensor.isPressed() && !touchedLeft) {
+					rightWheel.rotate(50);
+					leftWheel.stop();
+					touchedRight = true;
+
+					// wahrscheinlich sind wir hinten an der wand
+				} else if (rightTouchSensor.isPressed() && touchedLeft
+						&& !touchedRight) {
+					leftWheel.rotate(30);
+					rightWheel.stop();
 
 				} else {
-
-					rightWheel.rotate(10);
-					leftWheel.stop();
+					movement.fullSpeed();
+					movement.drive();
 					Delay.msDelay(20);
-					rightWheel.waitComplete();
 				}
 			}
 			System.out.println("go down");
