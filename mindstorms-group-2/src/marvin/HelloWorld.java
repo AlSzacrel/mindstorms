@@ -11,17 +11,9 @@ public class HelloWorld {
 
     private static Configuration configuration() throws IOException {
         Configuration configuration = new Configuration();
+        configuration.addStep(new FollowLine());
+        configuration.addStep(new QualifyTransition());
         configuration.addStep(new FollowWall());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new FollowEdge());
-        configuration.addStep(new Elevator());
-        configuration.addStep(new FollowWall());
-        // TODO add march and gate steps   
-        configuration.addStep(new HangingBridge());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new TurnTable());
-        configuration.addStep(new FollowLine());
-        configuration.addStep(new EmptyStep());
         return configuration;
     }
 
