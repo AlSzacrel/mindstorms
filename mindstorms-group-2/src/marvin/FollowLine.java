@@ -44,7 +44,7 @@ public class FollowLine implements Step {
         this.foundLeft = foundLeft;
     }
 
-    private void lost(Configuration configuration) {
+    public void lost(Configuration configuration) {
         lostNumber++;
         configuration.getMovementPrimitives().stop();
         configuration.getMovementPrimitives().resetSpeed();
