@@ -16,7 +16,7 @@ public class FollowWall implements Step {
      */
 
     // first labyrinth works with 30
-    private static final int SIDE_WALL_THRESHOLD = 11;
+    protected static final int SIDE_WALL_THRESHOLD = 11;
     private static final int GAIN = 5;
     private static final int MAX_CORRECTION = 45;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
@@ -73,7 +73,7 @@ public class FollowWall implements Step {
         movement.drive();
     }
 
-    private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+    protected void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
         int distance = ultraSonic.getDistance();
         int correctionFactor = SIDE_WALL_THRESHOLD - distance;
         int gainedCorrection = correctionFactor * GAIN;
