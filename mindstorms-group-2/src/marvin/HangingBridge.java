@@ -74,24 +74,10 @@ public class HangingBridge implements Step {
 				beginningOfPart = false;
 			}
 
-			LineBorders dataLine = sensorDataCollector.collectLineData();
-			int leftBorder = dataLine.getDarkToBright();
-			int rightBorder = dataLine.getBrightToDark();
-			int center = (leftBorder + rightBorder) / 2;
-
-			if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
-				dataLine = sensorDataCollector.collectLineData();
-				leftBorder = dataLine.getDarkToBright();
-				rightBorder = dataLine.getBrightToDark();
-				center = (leftBorder + rightBorder) / 2;
-
-				if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
-					followLinePart = false;
-					beginningOfPart = true;
-				}
-
-			} else {
-				followLine(movement, center);
+			if (!FollowLine.followShortAndStraightLine(movement,
+					sensorDataCollector)) {
+				followLinePart = false;
+				beginningOfPart = true;
 			}
 
 		} else {
@@ -105,7 +91,7 @@ public class HangingBridge implements Step {
 					ultraSonic);
 
 			if (reachedEndOfBridge) {
-				//TODO remove this delay if stop() is removed
+				// TODO remove this delay if stop() is removed
 				movement.crawl();
 				movement.drive();
 				Delay.msDelay(250);
@@ -124,13 +110,12 @@ public class HangingBridge implements Step {
 
 			if (floorWasBright) {
 				nDarkRounds = 0;
-			}			
-			
+			}
+
 			nDarkRounds += 1;
 			Sound.beep();
 
 			floorWasBright = false;
-
 
 			if (nDarkRounds > 6 && beenOnBridge) {
 				reachedEndOfBridge = true;
@@ -159,16 +144,6 @@ public class HangingBridge implements Step {
 		// Delay.msDelay(20);
 		// Sound.beep();
 		// }
-	}
-
-	private void followLine(MovementPrimitives movement, int center) {
-
-		int correctionFactor = ((Configuration.MAX_ANGLE / 2) - center);
-		int gainedFactor = (int) (correctionFactor * GAIN);
-
-		RConsole.println("" + gainedFactor);
-		movement.correct(gainedFactor);
-
 	}
 
 	private void followEdge(MovementPrimitives movement,
