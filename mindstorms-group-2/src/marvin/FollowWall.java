@@ -33,7 +33,7 @@ public class FollowWall implements Step {
         // the wall on the left or right side or until we hit the next wall.
 
         // TODO turn sensor head to side where we search the wall.
-        configuration.getSensorDataCollector().turnToLeftMaximum();
+        configuration.getSensorDataCollector().turnToWallPosition();
         // TODO change direction when distance to wall decreases
         TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
         TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
@@ -68,7 +68,7 @@ public class FollowWall implements Step {
         rightWheel.rotate(-200, true);
         leftWheel.waitComplete();
         rightWheel.waitComplete();
-        rightWheel.rotate(400, true);
+        rightWheel.rotate(380, true);
         leftWheel.waitComplete();
         rightWheel.waitComplete();
         movement.stop();
