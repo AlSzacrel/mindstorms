@@ -11,6 +11,8 @@ public class MovementPrimitives {
     private static final float SPEED_FACTOR_SLOW = SPEED_FACTOR_FULL / 2f;
     private static final float SPEED_FACTOR_CRAWL = SPEED_FACTOR_SLOW / 2f;
 	private static final float SPEED_FACTOR_STALK = SPEED_FACTOR_CRAWL / 4f;
+    private static final float SPEED_FACTOR_REEL = 0.75f;
+	private static final float SPEED_FACTOR_NORMAL = 0.5f;
     private float speed = 0;
     public final Configuration conf;
     private NXTRegulatedMotor leftWheel;
