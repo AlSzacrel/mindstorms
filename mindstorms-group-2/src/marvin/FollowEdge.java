@@ -82,7 +82,7 @@ lastCorrectionWasLeft = true;
         }
     }
 
-    private float getAverageDistance(UltrasonicSensor ultraSonic) {
+    public static float getAverageDistance(UltrasonicSensor ultraSonic) {
 
         // get a mean distance value
         float medDistance = ultraSonic.getDistance();
