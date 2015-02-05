@@ -44,7 +44,7 @@ public class FollowLine implements Step {
         this.foundLeft = foundLeft;
     }
 
-    private void lost(Configuration configuration) {
+    public void lost(Configuration configuration) {
         lostNumber++;
         configuration.getMovementPrimitives().stop();
         configuration.getMovementPrimitives().resetSpeed();
@@ -60,12 +60,16 @@ public class FollowLine implements Step {
             configuration.getMovementPrimitives().drive();
             boolean barcodeFound = false;
             while (!barcodeFound && !configuration.isCancel()) {
-                barcodeFound = configuration.getSensorDataCollector().detectBarcode(configuration.getLight());
+                barcodeFound = detectEnd(configuration);
             }
             if (barcodeFound) {
                 configuration.nextStep();
             }
         }
+    }
+
+    protected boolean detectEnd(Configuration configuration) {
+        return configuration.getSensorDataCollector().detectBarcode(configuration.getLight());
     }
 
     private void searchRight(Configuration configuration) {
