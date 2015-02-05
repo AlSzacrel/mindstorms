@@ -16,8 +16,12 @@ public class HelloWorld {
         configuration.addStep(new FollowEdge());
         configuration.addStep(new Elevator());
         configuration.addStep(new FollowWall());
-        // TODO gate
+        // TODO add march and gate steps   
         configuration.addStep(new HangingBridge());
+        configuration.addStep(new FollowLine());
+        configuration.addStep(new TurnTable());
+        configuration.addStep(new FollowLine());
+        configuration.addStep(new EmptyStep());
         return configuration;
     }
 
