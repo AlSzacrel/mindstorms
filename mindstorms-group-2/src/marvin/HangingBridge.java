@@ -34,6 +34,7 @@ public class HangingBridge implements Step {
 	private boolean followLinePart = false;
 	private boolean reachedEndOfBridge = false;
 	private boolean beginningOfPart = true;
+	private boolean beenOnBridge = false;
 
 	@Override
 	public void run(Configuration configuration) {
@@ -129,12 +130,13 @@ public class HangingBridge implements Step {
 			floorWasBright = false;
 
 
-			if (nDarkRounds > 4) {
+			if (nDarkRounds > 4 && beenOnBridge) {
 				reachedEndOfBridge = true;
 			}
 
 		} else if (light.getNormalizedLightValue() > BRIGHTNESS_THRESHOLD) {
 			floorWasBright = true;
+			beenOnBridge = true;
 		}
 
 		// if (light.getNormalizedLightValue() <= BRIGHTNESS_THRESHOLD
