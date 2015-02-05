@@ -25,6 +25,7 @@ public class FollowWall implements Step {
 
     @Override
     public void run(Configuration configuration) {
+        configuration.getMovementPrimitives().slow();
         // TODO initially search wall
         // search on the left and right side. If there is no wall, we are in the
         // middle
@@ -74,7 +75,7 @@ public class FollowWall implements Step {
         movement.drive();
     }
 
-    private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic, Configuration configuration) {
+    public void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic, Configuration configuration) {
         int distance = ultraSonic.getDistance();
         if (distance > SEARCH_THRESHOLD) {
             searchWall(configuration);
@@ -112,5 +113,10 @@ public class FollowWall implements Step {
         rightWheel.waitComplete();
         movement.stop();
         movement.drive();
+    }
+
+    @Override
+    public String getName() {
+        return "FollowWall";
     }
 }

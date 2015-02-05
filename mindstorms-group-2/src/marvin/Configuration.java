@@ -199,7 +199,7 @@ public class Configuration implements CancelUpdater {
 
     public void nextStep() {
         if (steps.isEmpty()) {
-        	return;
+            return;
         }
         currentStep = steps.remove(0);
         sensorDataCollector.resetBarcode();
@@ -210,7 +210,15 @@ public class Configuration implements CancelUpdater {
         if (currentStep == null) {
             return;
         }
+        System.out.println("Step: " + currentStep.getName());
         currentStep.run(this);
+    }
+
+    public void printSteps() {
+        System.out.println(currentStep.getName());
+        for (Step step : steps) {
+            System.out.println(step.getName());
+        }
     }
 
 }
