@@ -122,15 +122,17 @@ public class HangingBridge implements Step {
 
 		if (sensorDataCollector.isDark(light.getNormalizedLightValue())) {
 
-			if (!floorWasBright) {
-				nDarkRounds += 1;
-				Sound.beep();
+			if (floorWasBright) {
+				nDarkRounds = 0;
 			}			
+			
+			nDarkRounds += 1;
+			Sound.beep();
 
 			floorWasBright = false;
 
 
-			if (nDarkRounds > 4 && beenOnBridge) {
+			if (nDarkRounds > 6 && beenOnBridge) {
 				reachedEndOfBridge = true;
 			}
 
