@@ -6,6 +6,7 @@ import lejos.nxt.Sound;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
+import lejos.util.Delay;
 
 public class FollowWall implements Step {
 
@@ -39,7 +40,7 @@ public class FollowWall implements Step {
         LightSensor light = configuration.getLight();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
-        followWall(movement, ultraSonic);
+        followWall(movement, ultraSonic, configuration);
         detectWall(configuration, movement, rightTouchSensor, leftTouchSensor);
         if (sensorDataCollector.detectBarcode(light)) {
             Sound.beep();
@@ -73,10 +74,10 @@ public class FollowWall implements Step {
         movement.drive();
     }
 
-    private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+    private void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic, Configuration configuration) {
         int distance = ultraSonic.getDistance();
         if (distance > SEARCH_THRESHOLD) {
-            searchWall(movement);
+            searchWall(configuration);
         }
         int correctionFactor = SIDE_WALL_THRESHOLD - distance;
         int gainedCorrection = correctionFactor * GAIN;
@@ -88,7 +89,28 @@ public class FollowWall implements Step {
     }
 
     // TODO do we really need this method
-    private void searchWall(MovementPrimitives movement) {
-        movement.backup();
+    private void searchWall(Configuration configuration) {
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        MovementPrimitives movement = configuration.getMovementPrimitives();
+
+        movement.stop();
+        leftWheel.rotate(200, true);
+        rightWheel.rotate(200, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        leftWheel.rotate(380, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        movement.stop();
+        movement.drive();
     }
 }
