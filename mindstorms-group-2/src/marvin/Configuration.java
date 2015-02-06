@@ -214,4 +214,11 @@ public class Configuration implements CancelUpdater {
         currentStep.run(this);
     }
 
+    public void printSteps() {
+        System.out.println(currentStep.getName());
+        for (Step step : steps) {
+            System.out.println(step.getName());
+        }
+    }
+
 }

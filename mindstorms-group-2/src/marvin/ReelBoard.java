@@ -29,6 +29,7 @@ public class ReelBoard implements Step {
             }
             System.out.println("Successful passed");
         }
+        configuration.nextStep();
     }
 
     @Override
