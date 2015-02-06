@@ -6,7 +6,7 @@ import lejos.nxt.comm.RConsole;
 public class FollowLine implements Step {
 
     private static final int FOUND_ANGLE = 30;
-    private static final int LOST_ANGLE = 50;
+    private static final int LOST_ANGLE = 80;
     private static final int SPEED = 150;
     private static final float GAIN = 0.5f;
     private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
@@ -27,6 +27,7 @@ public class FollowLine implements Step {
         if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
             // help we are lost
             if (lostNumber == 0) {
+                movement.stop();
                 LineBorders lostData = configuration.getSensorDataCollector().collectLineData();
                 if (lostData.getDarkToBright() < LOW_THRESHOLD && lineData.getBrightToDark() > HIGH_THRESHOLD) {
                     lost(configuration);
