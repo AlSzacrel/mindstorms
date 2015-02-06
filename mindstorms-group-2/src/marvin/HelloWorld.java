@@ -55,6 +55,7 @@ public class HelloWorld {
     private static void initializeDefaultSteps() {
         defaultSteps = new ArrayList<Step>();
         defaultSteps.add(new FollowWall());
+        defaultSteps.add(new WallToLine());
         defaultSteps.add(new FollowLine());
         defaultSteps.add(new FollowEdge());
         defaultSteps.add(new Elevator());

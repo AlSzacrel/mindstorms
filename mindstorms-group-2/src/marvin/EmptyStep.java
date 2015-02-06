@@ -6,6 +6,7 @@ public class EmptyStep implements Step {
 
     @Override
     public void run(Configuration configuration) {
+        configuration.getMovementPrimitives().stop();
         Delay.msDelay(1000);
     }
 

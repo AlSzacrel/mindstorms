@@ -46,12 +46,8 @@ public class FollowWall implements Step {
         if (sensorDataCollector.detectBarcode(light)) {
             Sound.beep();
             Sound.beep();
+            movement.stop();
             configuration.nextStep();
-            sensorDataCollector.turnToCenter();
-            while (sensorDataCollector.isDark(light.getNormalizedLightValue()) && !configuration.isCancel()) {
-                movement.drive();
-            }
-            sensorDataCollector.turnToLeftMaximum();
         }
     }
 

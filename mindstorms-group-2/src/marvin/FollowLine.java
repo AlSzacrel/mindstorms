@@ -6,7 +6,7 @@ import lejos.nxt.comm.RConsole;
 public class FollowLine implements Step {
 
     private static final int FOUND_ANGLE = 30;
-    private static final int LOST_ANGLE = 80;
+    private static final int LOST_ANGLE = 75;
     private static final int SPEED = 150;
     private static final float GAIN = 0.5f;
     private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
@@ -68,6 +68,7 @@ public class FollowLine implements Step {
         }
         if (lostNumber > 2) {
             configuration.getMovementPrimitives().resetSpeed();
+            configuration.getSensorDataCollector().resetBarcode();
             configuration.getMovementPrimitives().drive();
             boolean barcodeFound = false;
             while (!barcodeFound && !configuration.isCancel()) {
