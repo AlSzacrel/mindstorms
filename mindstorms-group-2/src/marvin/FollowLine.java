@@ -26,8 +26,16 @@ public class FollowLine implements Step {
 
         if (leftBorder < LOW_THRESHOLD && rightBorder > HIGH_THRESHOLD) {
             // help we are lost
-            lost(configuration);
-            return;
+            if (lostNumber == 0) {
+                LineBorders lostData = configuration.getSensorDataCollector().collectLineData();
+                if (lostData.getDarkToBright() < LOW_THRESHOLD && lineData.getBrightToDark() > HIGH_THRESHOLD) {
+                    lost(configuration);
+                    return;
+                }
+            } else {
+                lost(configuration);
+                return;
+            }
         }
 
         int center = (leftBorder + rightBorder) / 2;
@@ -36,6 +44,8 @@ public class FollowLine implements Step {
         int gainedFactor = (int) (correctionFactor * GAIN);
 
         RConsole.println("" + gainedFactor);
+        configuration.getSensorDataCollector().resetBarcode();
+        resetLost(foundLeft);
         movement.correct(gainedFactor);
     }
 

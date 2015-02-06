@@ -8,15 +8,15 @@ import lejos.util.Delay;
 
 public class HangingBridge implements Step {
 
-	// follow wall
-	private final static int NO_WALL = 30;
-	private FollowWall followWall = new FollowWall();
+    // follow wall
+    private final static int NO_WALL = 30;
+    private final FollowWall followWall = new FollowWall();
 
-	// follow line
-	private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
-	private static final int LOW_THRESHOLD = 5;
-	private static final float GAIN = 0.5f;
-	private FollowLine followLine = new FollowLine();
+    // follow line
+    private static final int HIGH_THRESHOLD = Configuration.MAX_ANGLE - 5;
+    private static final int LOW_THRESHOLD = 5;
+    private static final float GAIN = 0.5f;
+    private final FollowLine followLine = new FollowLine();
 
 	// drive the bridge
 	private final static int SIDE_EDGE_THRESHOLD = 25;
@@ -91,7 +91,7 @@ public class HangingBridge implements Step {
 					ultraSonic);
 
 			if (reachedEndOfBridge) {
-				// TODO remove this delay if stop() is removed
+				//TODO remove this delay if stop() is removed
 				movement.crawl();
 				movement.drive();
 				Delay.msDelay(250);
@@ -110,12 +110,13 @@ public class HangingBridge implements Step {
 
 			if (floorWasBright) {
 				nDarkRounds = 0;
-			}
-
+			}			
+			
 			nDarkRounds += 1;
 			Sound.beep();
 
 			floorWasBright = false;
+
 
 			if (nDarkRounds > 6 && beenOnBridge) {
 				reachedEndOfBridge = true;
@@ -144,6 +145,16 @@ public class HangingBridge implements Step {
 		// Delay.msDelay(20);
 		// Sound.beep();
 		// }
+	}
+
+	private void followLine(MovementPrimitives movement, int center) {
+
+		int correctionFactor = ((Configuration.MAX_ANGLE / 2) - center);
+		int gainedFactor = (int) (correctionFactor * GAIN);
+
+		RConsole.println("" + gainedFactor);
+		movement.correct(gainedFactor);
+
 	}
 
 	private void followEdge(MovementPrimitives movement,

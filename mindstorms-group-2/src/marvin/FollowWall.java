@@ -6,6 +6,7 @@ import lejos.nxt.Sound;
 import lejos.nxt.TouchSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
+import lejos.util.Delay;
 
 public class FollowWall implements Step {
 
@@ -16,8 +17,9 @@ public class FollowWall implements Step {
      */
 
     // first labyrinth works with 30
-    private static final int SIDE_WALL_THRESHOLD = 11;
-    private static final int GAIN = 5;
+    private static final int SIDE_WALL_THRESHOLD = 9;
+    private static final int SEARCH_THRESHOLD = 50;
+    private static final int GAIN = 10;
     private static final int MAX_CORRECTION = 45;
     private static final int MIN_CORRECTION = -MAX_CORRECTION;
 
@@ -31,7 +33,7 @@ public class FollowWall implements Step {
         // the wall on the left or right side or until we hit the next wall.
 
         // TODO turn sensor head to side where we search the wall.
-        configuration.getSensorDataCollector().turnToLeftMaximum();
+        configuration.getSensorDataCollector().turnToWallPosition();
         // TODO change direction when distance to wall decreases
         TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
         TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
@@ -39,7 +41,7 @@ public class FollowWall implements Step {
         LightSensor light = configuration.getLight();
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
-        followWall(movement, ultraSonic);
+        followWall(movement, ultraSonic, configuration);
         detectWall(configuration, movement, rightTouchSensor, leftTouchSensor);
         if (sensorDataCollector.detectBarcode(light)) {
             Sound.beep();
@@ -66,15 +68,18 @@ public class FollowWall implements Step {
         rightWheel.rotate(-200, true);
         leftWheel.waitComplete();
         rightWheel.waitComplete();
-        rightWheel.rotate(400, true);
+        rightWheel.rotate(380, true);
         leftWheel.waitComplete();
         rightWheel.waitComplete();
         movement.stop();
         movement.drive();
     }
 
-    public void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+    public void followWall(MovementPrimitives movement, UltrasonicSensor ultraSonic, Configuration configuration) {
         int distance = ultraSonic.getDistance();
+        if (distance > SEARCH_THRESHOLD) {
+            searchWall(configuration);
+        }
         int correctionFactor = SIDE_WALL_THRESHOLD - distance;
         int gainedCorrection = correctionFactor * GAIN;
         int limittedCorrection = Math.max(gainedCorrection, MIN_CORRECTION);
@@ -82,6 +87,32 @@ public class FollowWall implements Step {
         RConsole.println("d: " + distance + " c: " + correctionFactor + " g: " + gainedCorrection + " l: "
                 + limittedCorrection);
         movement.correct(limittedCorrection);
+    }
+
+    // TODO do we really need this method
+    private void searchWall(Configuration configuration) {
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+        Delay.msDelay(100);
+        Sound.beep();
+
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        MovementPrimitives movement = configuration.getMovementPrimitives();
+
+        movement.stop();
+        leftWheel.rotate(200, true);
+        rightWheel.rotate(200, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        leftWheel.rotate(380, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        movement.stop();
+        movement.drive();
     }
 
     @Override
