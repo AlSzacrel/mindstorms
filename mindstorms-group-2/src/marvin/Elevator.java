@@ -21,9 +21,23 @@ public class Elevator implements Step {
         configuration.getLight().setFloodlight(false);
         movement.slow();
         movement.stop();
+        TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
+        TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
         RConsole.println("Elevator step started");
 
         // TODO align in drive direction
+        rightWheel.rotate(120);
+        rightWheel.waitComplete();
+
+        leftWheel.rotate(400, true);
+        rightWheel.rotate(400, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+
+        leftWheel.rotate(120);
+        leftWheel.waitComplete();
 
         // Connect to bluetooth
         try (LiftConnection lift = BluetoothCommunication.connectToLift(configuration)) {
@@ -39,10 +53,6 @@ public class Elevator implements Step {
             // TODO drive into elevator
             System.out.println("Start to drive");
             movement.drive();
-            TouchSensor leftTouchSensor = configuration.getLeftTouchSensor();
-            TouchSensor rightTouchSensor = configuration.getRightTouchSensor();
-            NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
-            NXTRegulatedMotor rightWheel = configuration.getRightWheel();
             while (!configuration.isCancel()) {
                 lift.canExit();
                 // TODO detect stop, use distance sensor
