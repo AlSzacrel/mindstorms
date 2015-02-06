@@ -1,19 +1,20 @@
 package marvin;
 
 import lejos.nxt.LightSensor;
+import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.util.Delay;
 
 public class FollowEdge implements Step {
 
-    private final static int SIDE_EDGE_THRESHOLD = 15;
-    private final static int LEFT_CORRECTION_FACTOR = 15;
-    private final static int RIGHT_CORRECTION_FACTOR = -10;
+    private final static int SIDE_EDGE_THRESHOLD = 20;
+    private final static int LEFT_CORRECTION_FACTOR = 25;
+    private final static int RIGHT_CORRECTION_FACTOR = -15;
     private final static int DISTANCE_ERROR = 255;
-	private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
+    private static final int DETECT_ELEVATOR_LIGHT_THRESHOLD = 480;
     private boolean lastCorrectionWasLeft = false;
 
-	private boolean beginning = true;
+    private boolean beginning = true;
 
     @Override
     public void run(Configuration configuration) {
@@ -22,36 +23,63 @@ public class FollowEdge implements Step {
         MovementPrimitives movement = configuration.getMovementPrimitives();
         SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
 
-		sensorDataCollector.turnToRightMaximum();
+        sensorDataCollector.turnToRightMaximum();
 
-		if (beginning) {
-			takeTheRamp(movement, ultraSonic);
-			beginning = false;
-		}
+        if (beginning) {
+            takeTheRamp(configuration, movement, ultraSonic);
+            beginning = false;
+        }
 
         followEdge(movement, ultraSonic);
 
-		if (light.getNormalizedLightValue() > DETECT_ELEVATOR_LIGHT_THRESHOLD) {
+        if (light.getNormalizedLightValue() > DETECT_ELEVATOR_LIGHT_THRESHOLD) {
             configuration.nextStep();
-			movement.stop();
+            movement.stop();
         }
 
     }
 
-	private void takeTheRamp(MovementPrimitives movement,
-			UltrasonicSensor ultraSonic) {
-		movement.slow();
-		movement.drive();
-		Delay.msDelay(5000);
-		movement.turnRight();
-		Delay.msDelay(520);
-		movement.crawl();
-		movement.drive();
+    private void takeTheRamp(Configuration configuration, MovementPrimitives movement, UltrasonicSensor ultraSonic) {
+        movement.stop();
+        NXTRegulatedMotor leftWheel = configuration.getLeftWheel();
+        NXTRegulatedMotor rightWheel = configuration.getRightWheel();
+        SensorDataCollector sensorDataCollector = configuration.getSensorDataCollector();
+        LightSensor light = configuration.getLight();
+        // TODO align at barcode
+        leftWheel.rotate(80, true);
+        rightWheel.rotate(80, true);
+        leftWheel.waitComplete();
+        rightWheel.waitComplete();
+        sensorDataCollector.turnToRightMaximum();
+        rightWheel.backward();
+        while (!configuration.isCancel() && rightWheel.isMoving()) {
+            if (sensorDataCollector.isBright(light.getNormalizedLightValue())) {
+                rightWheel.stop();
+                break;
+            }
+        }
+        sensorDataCollector.turnToLeftMaximum();
+        leftWheel.backward();
+        while (!configuration.isCancel() && leftWheel.isMoving()) {
+            if (sensorDataCollector.isBright(light.getNormalizedLightValue())) {
+                leftWheel.stop();
+                break;
+            }
+        }
+        leftWheel.rotate(80);
+        // movement.drive();
+        // movement.slow();
+        movement.drive();
+        movement.crawl();
+        Delay.msDelay(6500);
+        // movement.turnRight();
+        // Delay.msDelay(520);
+        // movement.drive();
 
-		while (getAverageDistance(ultraSonic) < SIDE_EDGE_THRESHOLD) {
-			Delay.msDelay(20);
-		}
-	}
+        while (getAverageDistance(ultraSonic) < SIDE_EDGE_THRESHOLD) {
+            Delay.msDelay(20);
+        }
+    }
 
     private void followEdge(MovementPrimitives movement, UltrasonicSensor ultraSonic) {
 
@@ -66,9 +94,8 @@ public class FollowEdge implements Step {
                 hasStopped = false;
             }
 
-            
-			movement.correct(LEFT_CORRECTION_FACTOR);
-lastCorrectionWasLeft = true;
+            movement.correct(LEFT_CORRECTION_FACTOR);
+            lastCorrectionWasLeft = true;
 
             // If there is no edge
         } else {
