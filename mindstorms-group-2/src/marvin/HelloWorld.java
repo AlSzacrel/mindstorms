@@ -65,9 +65,7 @@ public class HelloWorld {
         defaultSteps.add(new TurnBeforeReel());
         defaultSteps.add(new HangingBridge());
         defaultSteps.add(new FollowLine());
-        defaultSteps.add(new TurnTable());
-        defaultSteps.add(new FollowLine());
-        defaultSteps.add(new EmptyStep());
+        defaultSteps.add(new KillBossStep());
     }
 
     private static Configuration configuration() throws IOException {
